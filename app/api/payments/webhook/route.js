@@ -1,8 +1,5 @@
-import { prisma } from "@/lib/db";
-import { getPlanById, getPlanByPriceIdOneOff } from "@/lib/utils";
 import { NextResponse } from "next/server";
-import { logger } from "@/lib/logger"; // Assuming you have a logger utility
-import { updateTransactionStatus } from "@/lib/actions";
+import { updateTransactionStatus } from "@/lib/transactions";
 
 export async function POST(req) {
 	const body = await req.json();
@@ -15,9 +12,12 @@ export async function POST(req) {
 		return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 	}
 
+	if (!body?.data?.tx_ref) {
+		return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
+	}
+
 	try {
-		const { tx_ref, status, id } = body.data;
-		console.log("Webhook data: ", body.data);
+		const { tx_ref, status } = body.data;
 
 		// Determine transaction status
 		let transactionStatus;
@@ -31,31 +31,24 @@ export async function POST(req) {
 			case "cancelled":
 				transactionStatus = "CANCELLED";
 				break;
+			default:
+				return NextResponse.json(
+					{ error: "Unsupported transaction status" },
+					{ status: 400 }
+				);
 		}
 
 		// Update transaction status
-		const transaction = await updateTransactionStatus(
+		const result = await updateTransactionStatus(
 			tx_ref,
 			transactionStatus,
 			body.data
 		);
-		console.log("Updated trnx: ", transaction);
-
-		// Additional logic for successful transactions (e.g., credit user)
-		if (transactionStatus === "SUCCESS") {
-			// Implement user credit allocation logic
-			const updatedCredits =
-				Number(metadata.userCredits || 0) + transaction.credits;
-
-			await prisma.user.update({
-				where: { id: metadata.userId },
-				data: { credits: updatedCredits },
-			});
-
-			logger.info("One-off purchase processed", {
-				userId: transaction.user.id,
-				credits: updatedCredits,
-			});
+		if (!result.success) {
+			return NextResponse.json(
+				{ error: "Processing failed" },
+				{ status: 500 }
+			);
 		}
 
 		return NextResponse.json({ received: true });

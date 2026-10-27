@@ -4,11 +4,16 @@ import { useRouter } from "next/navigation";
 
 export const DashboardAuthWrapper = ({ children }) => {
 	const router = useRouter();
-	const { data: session } = useSession({
+	const { status } = useSession({
 		required: true,
 		onUnauthenticated() {
-			router.push("/");
+			router.push("/auth/signin");
 		},
 	});
+
+	if (status !== "authenticated") {
+		return null;
+	}
+
 	return <>{children}</>;
 };

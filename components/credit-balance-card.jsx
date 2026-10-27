@@ -17,20 +17,23 @@ import { getUser } from "@/lib/actions";
 
 function CreditBalanceCard() {
 	const { data: session } = useSession();
-	const userId = session?.user.id;
+	const userId = session?.user?.id;
 	const [user, setUser] = useState({});
 
 	useEffect(() => {
+		if (!userId) return;
+
 		async function getUserData() {
-			const result = await getUser(userId);
+			const result = await getUser();
 			if (result.success) {
-				setUser(result.user);
+				setUser(result.user || {});
 			}
 		}
 		getUserData();
 	}, [userId]);
 
-	const progress = (user?.credits / MAXCREDITS) * 100;
+	const credits = user?.credits ?? 0;
+	const progress = Math.min(Math.max((credits / MAXCREDITS) * 100, 0), 100);
 	return (
 		<div className="mt-auto">
 			<Card>
@@ -55,13 +58,12 @@ function CreditBalanceCard() {
 									Available
 								</span>
 								<span className="font-medium">
-									{user?.credits?.toLocaleString() || 0}{" "}
-									credits
+									{credits.toLocaleString()} credits
 								</span>
 							</div>
 							<Progress value={progress} className="h-2" />
 							<div className="flex justify-between text-xs text-muted-foreground">
-								<span>{user?.credits}</span>
+								<span>{credits}</span>
 								<span>{MAXCREDITS.toLocaleString()}</span>
 							</div>
 						</div>

@@ -5,11 +5,16 @@ import ChannelImage from "@/public/illustartions/channels.png";
 import CloudImage from "@/public/illustartions/cloud.png";
 
 export const siteConfig = {
-	name: "YouAudio",
+	name: "Opttis",
 	heroIntro: "Stay Updated with the Latest YouTube Content – In Audio",
 	description:
 		"Effortlessly track your favorite YouTube channels and get new video content in audio format. Subscribe, listen, and enjoy – all on your terms.",
-	keywords: ["component library", "react", "vue", "reactjs"],
+	keywords: [
+		"youtube audio",
+		"youtube to mp3",
+		"audio library",
+		"youtube channel monitoring",
+	],
 	features: [
 		{
 			name: "Instant Audio Extraction from YouTube Videos.",

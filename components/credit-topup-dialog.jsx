@@ -47,12 +47,7 @@ export const CreditTopupDialog = ({ user }) => {
 					headers: {
 						"Content-Type": "application/json",
 					},
-					body: JSON.stringify({
-						userId: user?.id,
-						userCredits: user?.credits,
-						email: user?.email,
-						priceId: plan_id,
-					}),
+					body: JSON.stringify({ priceId: plan_id }),
 				}
 			);
 
@@ -68,7 +63,7 @@ export const CreditTopupDialog = ({ user }) => {
 			console.log("Response: ", data);
 
 			if (data.url) {
-				// Redirect directly to Stripe checkout URL
+				// Redirect directly to the payment provider checkout
 				window.location.href = data.url;
 				return;
 			}

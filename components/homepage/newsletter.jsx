@@ -15,16 +15,20 @@ const Newsletter = () => {
 		e.preventDefault();
 		setLoading(true);
 
-		const response = await addNewsletterSubscriber(email);
+		try {
+			const response = await addNewsletterSubscriber(email);
 
-		if (response.success) {
-			toast.success("Thank you for subscribing!");
-			setEmail(""); // Reset the input field
-		} else {
-			toast.info(response.message);
+			if (response.success) {
+				toast.success("Thank you for subscribing!");
+				setEmail("");
+			} else {
+				toast.info(response.message);
+			}
+		} catch (error) {
+			toast.error(error.message || "Failed to subscribe.");
+		} finally {
+			setLoading(false);
 		}
-		setLoading(false);
-		setEmail("");
 	};
 
 	return (
@@ -55,8 +59,8 @@ const Newsletter = () => {
 							Subscribe to our newsletter
 						</h2>
 						<p className="text-gray-600">
-							Enjoy using Block Template and stay tuned for the
-							latest updates and news.
+							Enjoy using Opttis and stay tuned for the latest
+							updates and news.
 						</p>
 					</div>
 					<div className="w-full max-w-md">
@@ -92,21 +96,6 @@ const Newsletter = () => {
 									{isLoading && <Spinner />}
 									Subscribe
 								</Button>
-							</div>
-							{/* Anti-spam hidden field */}
-							<div
-								style={{
-									position: "absolute",
-									left: "-5000px",
-								}}
-								aria-hidden="true"
-							>
-								<Input
-									className="subscription-form-antispam"
-									type="text"
-									name="b_b838b4eb099ebf09c3407db0f_b01fb647c7"
-									tabIndex="-1"
-								/>
 							</div>
 						</form>
 					</div>

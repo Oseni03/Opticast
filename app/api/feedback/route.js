@@ -1,28 +1,39 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { getServerSession } from "next-auth";
+import { prisma } from "@/lib/db";
+import { authOptions } from "../auth/[...nextauth]/route";
 
 export async function POST(req) {
 	try {
-		const { userId, title, description } = await req.json();
+		const session = await getServerSession(authOptions);
+		if (!session?.user?.id) {
+			return NextResponse.json(
+				{ error: "Unauthorized" },
+				{ status: 401 }
+			);
+		}
+
+		const { title, description } = await req.json();
+		if (!title || !description) {
+			return NextResponse.json(
+				{ error: "Title and description are required" },
+				{ status: 400 }
+			);
+		}
 
 		const feedback = await prisma.feedback.create({
 			data: {
+				userId: session.user.id,
 				title,
 				description,
 			},
 		});
-		console.log(feedback);
 
-		return NextResponse.json({
-			feedback: {
-				userId: userId,
-				title: feedback.title,
-				description: feedback.description,
-			},
-		});
+		return NextResponse.json({ feedback });
 	} catch (error) {
-		return NextResponse.json({ error: error }, { status: 500 });
+		return NextResponse.json(
+			{ error: error.message || "Failed to submit feedback" },
+			{ status: 500 }
+		);
 	}
 }

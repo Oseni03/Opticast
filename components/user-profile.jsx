@@ -10,32 +10,17 @@ import {
 	DropdownMenuShortcut,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ChartLine, CircleUser, LogOut, Settings, User } from "lucide-react";
-import { useSession } from "next-auth/react";
+import { ChartLine, CircleUser, LogOut, User } from "lucide-react";
+import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ProfileDialog } from "./profile-dialog";
 import { Button } from "./ui/button";
-import { signOut } from "next-auth/react";
-import { useState, useEffect } from "react";
-import { getUser } from "@/lib/actions";
 import { toast } from "react-toastify";
 
 export function UserProfile() {
 	const router = useRouter();
 	const { data: session } = useSession();
-	const userId = session?.user.id;
-	const [user, setUser] = useState({});
-
-	useEffect(() => {
-		async function getUserData() {
-			const result = await getUser(userId);
-			if (result.success) {
-				setUser(result.user);
-			}
-		}
-		getUserData();
-	}, [userId]);
 
 	const handleLogout = async () => {
 		try {
@@ -52,7 +37,10 @@ export function UserProfile() {
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild className="w-[2.25rem] h-[2.25rem]">
 				<Avatar>
-					<AvatarImage src={user?.image} alt="User Profile" />
+					<AvatarImage
+						src={session?.user?.image}
+						alt="User Profile"
+					/>
 					<AvatarFallback>
 						<CircleUser className="h-5 w-5" />
 					</AvatarFallback>

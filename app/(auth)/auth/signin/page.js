@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { UserAuthForm } from "../../components/user-auth-form";
 import AuthPage from "../../components/auth-page";
 import { signIn, useSession } from "next-auth/react";
@@ -9,11 +9,13 @@ import { toast } from "react-toastify";
 export default function Page() {
 	const router = useRouter();
 	const { data: session } = useSession();
-
-	if (session?.user) {
-		router.push("/dashboard");
-	}
 	const [globalError, setGlobalError] = useState("");
+
+	useEffect(() => {
+		if (session?.user) {
+			router.push("/dashboard");
+		}
+	}, [session, router]);
 
 	const onSubmit = async ({ email, password }) => {
 		try {

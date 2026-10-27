@@ -1,5 +1,4 @@
-import { AccordionComponent } from "@/components/homepage/accordion-component";
-import HeroSection from "@/components/homepage/hero-section";
+﻿import HeroSection from "@/components/homepage/hero-section";
 import Newsletter from "@/components/homepage/newsletter";
 import Pricing from "@/components/homepage/pricing";
 import Features from "@/components/homepage/features";
@@ -32,9 +31,6 @@ export default function Home() {
 			>
 				<Newsletter />
 			</div>
-			{/* <div className="flex justify-center items-center w-full my-[8rem]">
-				<AccordionComponent />
-			</div> */}
 		</PageWrapper>
 	);
 }

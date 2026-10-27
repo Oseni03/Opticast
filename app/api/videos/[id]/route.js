@@ -1,42 +1,14 @@
+import { getServerSession } from "next-auth";
 import { prisma } from "@/lib/db";
-
-export async function GET(request, { params }) {
-	try {
-		// Extract video ID from the query params
-		const videoId = params.id;
-
-		if (!videoId) {
-			return Response.json(
-				{ error: "Video ID is required" },
-				{ status: 400 }
-			);
-		}
-
-		// Fetch video data by ID
-		const video = await prisma.video.findUnique({
-			where: { id: videoId },
-			include: {
-				channel: true, // Include related channel data if needed
-			},
-		});
-
-		if (!video) {
-			return Response.json({ error: "Video not found" }, { status: 404 });
-		}
-
-		return Response.json(video);
-	} catch (error) {
-		console.error("Error fetching video:", error);
-		return Response.json(
-			{ error: "An unexpected error occurred" },
-			{ status: 500 }
-		);
-	}
-}
+import { authOptions } from "../../auth/[...nextauth]/route";
 
 export async function DELETE(request, { params }) {
 	try {
-		// Extract video ID from the request body
+		const session = await getServerSession(authOptions);
+		if (!session?.user?.id) {
+			return Response.json({ error: "Unauthorized" }, { status: 401 });
+		}
+
 		const { id } = await params;
 
 		if (!id) {
@@ -46,17 +18,36 @@ export async function DELETE(request, { params }) {
 			);
 		}
 
-		// Delete the video from the database
-		const deletedVideo = await prisma.video.delete({
-			where: { id },
+		const video = await prisma.video.findFirst({
+			where: {
+				id,
+				users: { some: { id: session.user.id } },
+			},
+			include: {
+				users: { select: { id: true } },
+			},
 		});
 
-		return Response.json({ success: true, deletedVideo });
+		if (!video) {
+			return Response.json({ error: "Video not found" }, { status: 404 });
+		}
+
+		await prisma.video.update({
+			where: { id },
+			data: {
+				users: { disconnect: { id: session.user.id } },
+			},
+		});
+
+		if (video.users.length === 1) {
+			await prisma.video.delete({ where: { id } });
+		}
+
+		return Response.json({ success: true });
 	} catch (error) {
 		console.error("Error deleting video:", error);
 
 		if (error.code === "P2025") {
-			// Prisma specific error code for record not found
 			return Response.json({ error: "Video not found" }, { status: 404 });
 		}
 

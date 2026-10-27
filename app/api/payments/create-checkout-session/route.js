@@ -1,36 +1,72 @@
 import { getPlanById } from "@/lib/utils";
-import { NextRequest, NextResponse } from "next/server";
-import { createTransaction } from "@/lib/actions";
-import axios from "axios";
+import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "../../auth/[...nextauth]/route";
+import { createTransaction } from "@/lib/transactions";
+import { prisma } from "@/lib/db";
 
 export async function POST(req) {
-	const body = await req.json();
-	const { userId, userCredits, email, priceId } = body;
+	const session = await getServerSession(authOptions);
+	if (!session?.user?.id) {
+		return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+	}
+
+	const body = await req.json().catch(() => null);
+	if (!body) {
+		return NextResponse.json(
+			{ error: "Invalid request body" },
+			{ status: 400 }
+		);
+	}
+	const { priceId } = body;
 
 	// Validate inputs
-	if (!userId || !userCredits || !email || !priceId) {
-		return NextResponse.json({ error: "Missing required fields" });
+	if (!priceId) {
+		return NextResponse.json(
+			{ error: "Missing required fields" },
+			{ status: 400 }
+		);
 	}
 
 	const price = getPlanById(priceId);
 	if (!price) {
-		return NextResponse.json({ error: "Invalid price ID" });
+		return NextResponse.json(
+			{ error: "Invalid price ID" },
+			{ status: 400 }
+		);
+	}
+
+	const user = await prisma.user.findUnique({
+		where: { id: session.user.id },
+		select: { id: true, email: true },
+	});
+	if (!user?.email) {
+		return NextResponse.json(
+			{ error: "User not found" },
+			{ status: 404 }
+		);
 	}
 
 	if (!process.env.NEXTAUTH_URL || !process.env.FLW_SECRET_KEY) {
-		return NextResponse.json({ error: "Missing environment variables" });
+		return NextResponse.json(
+			{ error: "Missing environment variables" },
+			{ status: 500 }
+		);
 	}
 
 	try {
 		// Create a pending transaction
 		const txn_resp = await createTransaction({
-			userId,
+			userId: user.id,
 			amount: parseFloat(price.amount),
 			credits: price.credits,
 			currency: price.currency,
 		});
 		if (!txn_resp.success) {
-			return NextResponse.json(txn_resp);
+			return NextResponse.json(
+				{ error: "Failed to create transaction" },
+				{ status: 500 }
+			);
 		}
 
 		const transaction = txn_resp.data;
@@ -47,11 +83,10 @@ export async function POST(req) {
 				amount: price.amount,
 				currency: price.currency,
 				redirect_url: `${process.env.NEXTAUTH_URL}/dashboard/payment`,
-				customer: { email, name: userId },
+				customer: { email: user.email, name: user.id },
 				meta: {
 					transactionId: transaction.id,
-					userId,
-					userCredits,
+					userId: user.id,
 					priceId,
 				},
 				customizations: {
@@ -67,7 +102,6 @@ export async function POST(req) {
 		}
 
 		const response = await resp.json();
-		console.log("Session response:", response);
 
 		if (!response.data?.link) {
 			throw new Error("Invalid provider response");
@@ -88,8 +122,9 @@ export async function POST(req) {
 		});
 	} catch (error) {
 		console.error("Payment process error:", error.message);
-		return NextResponse.json({
-			error: error.message || "Failed to create checkout session",
-		});
+		return NextResponse.json(
+			{ error: error.message || "Failed to create checkout session" },
+			{ status: 500 }
+		);
 	}
 }

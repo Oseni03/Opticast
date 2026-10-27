@@ -15,7 +15,6 @@ export const ContactForm = () => {
 		if (response.success) {
 			toast.success(response.message);
 		} else {
-			console.log(response);
 			toast.error("Error sending message. Try again later");
 		}
 	};

@@ -2,7 +2,6 @@ import { Button } from "@/components/ui/button";
 import PageWrapper from "@/components/wrapper/page-wrapper";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
-import React from "react";
 
 export default function Page() {
 	return (

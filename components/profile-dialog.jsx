@@ -12,32 +12,37 @@ import { ZodForm } from "./zod-form";
 import { profileFormSchema } from "@/lib/zod";
 import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
-import { updateUserProfile } from "@/lib/actions";
-import { getUser } from "@/lib/actions";
+import { updateUserProfile, getUser } from "@/lib/actions";
 
 export const ProfileDialog = ({ children }) => {
 	const { data: session } = useSession();
-	const userId = session?.user.id;
+	const userId = session?.user?.id;
 	const [user, setUser] = useState({});
 	const [isLoading, setLoading] = useState(false);
 	const [error, setError] = useState(null);
 
 	useEffect(() => {
+		if (!userId) return;
+
 		async function getUserData() {
-			const result = await getUser(userId);
-			console.log(result);
+			const result = await getUser();
 			if (result.success) {
-				setUser(result.user);
+				setUser(result.user || {});
 			}
 		}
 		getUserData();
 	}, [userId]);
 
 	const updateProfile = async ({ first_name, last_name }) => {
-		setLoading(true);
-		console.log(first_name, last_name);
+		if (!user?.id) {
+			toast.error("User data is still loading. Please try again.");
+			return;
+		}
 
-		const result = await updateUserProfile(user.id, first_name, last_name);
+		setLoading(true);
+		setError(null);
+
+		const result = await updateUserProfile(first_name, last_name);
 
 		if (result.status === "success") {
 			toast.success(result.message);
@@ -59,6 +64,7 @@ export const ProfileDialog = ({ children }) => {
 				</DialogHeader>
 				<ZodForm
 					schema={profileFormSchema}
+					key={user?.id || "loading-profile"}
 					defaultValues={{
 						first_name: user?.first_name || "",
 						last_name: user?.last_name || "",

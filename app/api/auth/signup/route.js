@@ -1,17 +1,21 @@
 import { hash } from "bcryptjs";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { signInSchema } from "@/lib/zod";
 
 export async function POST(req) {
 	try {
-		const { email, password } = await req.json();
+		const body = await req.json();
+		const validation = signInSchema.safeParse(body);
 
-		if (!email || !password) {
+		if (!validation.success) {
 			return NextResponse.json(
-				{ error: "Missing required fields" },
+				{ error: validation.error.issues[0].message },
 				{ status: 400 }
 			);
 		}
+
+		const { email, password } = validation.data;
 
 		// Check if user already exists
 		const existingUser = await prisma.user.findUnique({
@@ -38,6 +42,9 @@ export async function POST(req) {
 			user: { id: user.id, email: user.email },
 		});
 	} catch (error) {
-		return NextResponse.json({ error: error }, { status: 500 });
+		return NextResponse.json(
+			{ error: error.message || "Failed to create user" },
+			{ status: 500 }
+		);
 	}
 }

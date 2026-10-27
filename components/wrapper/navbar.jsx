@@ -5,7 +5,6 @@ import { GiHamburgerMenu } from "react-icons/gi";
 import { Button } from "../ui/button";
 import { UserProfile } from "../user-profile";
 import ModeToggle from "../mode-toggle";
-import { BlocksIcon } from "lucide-react";
 import {
 	Collapsible,
 	CollapsibleContent,
@@ -26,10 +25,9 @@ import { siteConfig } from "@/config/site";
 
 export default function NavBar() {
 	const router = useRouter();
-	let userId = null;
 	const { data: session } = useSession();
 	const [isOpen, setIsOpen] = React.useState(false);
-	userId = session?.user.id;
+	const userId = session?.user?.id;
 
 	return (
 		<>

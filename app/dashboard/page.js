@@ -1,41 +1,36 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
+import Link from "next/link";
 import { toast } from "react-toastify";
 import ChannelTable from "./channels/components/channel-table";
-import { Spinner } from "@/components/ui/Spinner";
 import { Button } from "@/components/ui/button";
 import {
 	Card,
 	CardContent,
-	CardDescription,
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-import Image from "next/image";
 import AudioTable from "./components/audio-table";
 import EmptyPlaceholder from "@/components/EmptyPlaceholder";
-import Link from "next/link";
 
 function Page() {
 	const [channels, setChannels] = useState([]);
 	const [audios, setAudios] = useState([]);
-	const [isLoading, setLoading] = useState(false);
 
 	// Fetch subscribed channels
 	useEffect(() => {
 		async function fetchSubscribedChannels() {
-			setLoading(true);
 			try {
 				const response = await fetch(`/api/channels?limit=5`);
+				const data = await response.json();
 				if (response.ok) {
-					const data = await response.json();
-					setChannels(data.channels);
+					setChannels(data.channels || []);
+				} else {
+					toast.error(data.error || "Failed to load channels.");
 				}
 			} catch (error) {
 				toast.error("Failed to load channels.");
-			} finally {
-				setLoading(false);
 			}
 		}
 
@@ -45,9 +40,11 @@ function Page() {
 					method: "GET",
 				});
 
+				const data = await response.json();
 				if (response.ok) {
-					const data = await response.json();
-					setAudios(data?.videos);
+					setAudios(data?.videos || []);
+				} else {
+					toast.error(data.error || "Failed to load audios.");
 				}
 			} catch (error) {
 				toast.error("Failed to load audios");
@@ -66,8 +63,8 @@ function Page() {
 					{audios.length > 0 ? (
 						<>
 							<AudioTable audios={audios} />
-							<Button size="sm" className="ml-auto">
-								View all
+							<Button asChild size="sm" className="ml-auto">
+								<Link href="/dashboard/library">View all</Link>
 							</Button>
 						</>
 					) : (
@@ -89,8 +86,8 @@ function Page() {
 								channels={channels}
 								setChannels={setChannels}
 							/>
-							<Button size="sm" className="ml-auto">
-								View all
+							<Button asChild size="sm" className="ml-auto">
+								<Link href="/dashboard/channels">View all</Link>
 							</Button>
 						</>
 					) : (

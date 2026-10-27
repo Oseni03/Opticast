@@ -1,4 +1,3 @@
-import * as React from "react";
 import { UserProfile } from "./user-profile";
 import {
 	Dialog,

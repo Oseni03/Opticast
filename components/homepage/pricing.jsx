@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import { useState } from "react";
 import {
 	Card,
 	CardContent,
@@ -14,7 +14,6 @@ import { cn } from "@/lib/utils";
 import { toast } from "react-toastify";
 import { useSession } from "next-auth/react";
 import { SUBSCRIPTION_PLANS } from "@/utils/constants";
-import { getUser } from "@/lib/actions";
 import { Spinner } from "../ui/Spinner";
 
 const PricingHeader = ({ title, subtitle }) => (
@@ -42,7 +41,7 @@ const CreditDisplay = ({ credits, bonusCredits }) => (
 );
 
 const PricingCard = ({
-	user,
+	isSignedIn,
 	handleCheckout,
 	title,
 	priceId,
@@ -101,7 +100,7 @@ const PricingCard = ({
 		<CardFooter className="mt-2">
 			<Button
 				onClick={() => {
-					if (user?.id) {
+					if (isSignedIn) {
 						handleCheckout(priceId);
 					} else {
 						toast.info("You must be logged in to make a purchase");
@@ -119,19 +118,8 @@ const PricingCard = ({
 
 export default function CreditBasedPricing() {
 	const { data: session } = useSession();
-	const userId = session?.user.id;
-	const [user, setUser] = useState({});
+	const isSignedIn = !!session?.user;
 	const [isLoading, setLoading] = useState(false);
-
-	useEffect(() => {
-		async function getUserData() {
-			const result = await getUser(userId);
-			if (result.success) {
-				setUser(result.user);
-			}
-		}
-		getUserData();
-	}, [userId]);
 
 	const handleCheckout = async (priceId) => {
 		try {
@@ -143,21 +131,17 @@ export default function CreditBasedPricing() {
 					headers: {
 						"Content-Type": "application/json",
 					},
-					body: JSON.stringify({
-						userId: user?.id,
-						userCredits: user?.credits,
-						email: user?.email,
-						priceId,
-					}),
+					body: JSON.stringify({ priceId }),
 				}
 			);
 
-			if (!response.ok) {
-				throw new Error("Failed to create checkout session");
-			}
-
 			const data = await response.json();
-			console.log(data);
+
+			if (!response.ok) {
+				throw new Error(
+					data.error || "Failed to create checkout session"
+				);
+			}
 
 			if (data.url) {
 				window.location.href = data.url;
@@ -166,7 +150,7 @@ export default function CreditBasedPricing() {
 			toast.error("Error during checkout");
 		} catch (error) {
 			console.log("Error during checkout:", error);
-			toast.error("Error during checkout");
+			toast.error(error.message || "Error during checkout");
 		} finally {
 			setLoading(false);
 		}
@@ -182,7 +166,7 @@ export default function CreditBasedPricing() {
 				{SUBSCRIPTION_PLANS.map((plan) => (
 					<PricingCard
 						key={plan.title}
-						user={user}
+						isSignedIn={isSignedIn}
 						handleCheckout={handleCheckout}
 						priceId={plan.id}
 						isLoading={isLoading}

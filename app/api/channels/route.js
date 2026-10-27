@@ -1,5 +1,3 @@
-// src/app/api/channels/route.ts
-
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getChannelData } from "@/lib/youtube";
@@ -18,6 +16,13 @@ export async function POST(request) {
 		}
 
 		const { url } = await request.json();
+		if (!url) {
+			return NextResponse.json(
+				{ error: "Channel URL is required" },
+				{ status: 400 }
+			);
+		}
+
 		const channelData = await getChannelData(url);
 
 		if (!channelData) {
@@ -50,9 +55,6 @@ export async function POST(request) {
 			},
 		});
 
-		// // Sync channel videos
-		// await syncChannelVideos(channelData.id);
-
 		// Return channel with subscription status
 		const channelWithSubscription = await prisma.channel.findUnique({
 			where: { id: channel.id },
@@ -68,7 +70,7 @@ export async function POST(request) {
 		return NextResponse.json(channelWithSubscription);
 	} catch (error) {
 		return NextResponse.json(
-			{ error: error || "Internal server error" },
+			{ error: error.message || "Internal server error" },
 			{ status: 500 }
 		);
 	}
@@ -86,9 +88,14 @@ export async function GET(request) {
 
 		// Get pagination parameters from the URL
 		const { searchParams } = new URL(request.url);
-		const page = parseInt(searchParams.get("page") || "1");
-		const limit = parseInt(
-			searchParams.get("limit") || PAGINATION_PAGE_SIZE
+		const page = Math.max(parseInt(searchParams.get("page")) || 1, 1);
+		const limit = Math.min(
+			Math.max(
+				parseInt(searchParams.get("limit")) ||
+					PAGINATION_PAGE_SIZE,
+				1
+			),
+			100
 		);
 
 		// Get channels using the Subscription relation

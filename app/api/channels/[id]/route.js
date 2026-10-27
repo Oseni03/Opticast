@@ -14,8 +14,7 @@ export async function DELETE(request, { params }) {
 			);
 		}
 
-		const channelId = await params.id;
-		console.log("Channel ID: ", channelId);
+		const { id: channelId } = await params;
 
 		// Update the channel by removing the current user from subscribers
 		await prisma.channel.update({
@@ -30,15 +29,12 @@ export async function DELETE(request, { params }) {
 				},
 			},
 		});
-		console.log("Successfully unsubscribed");
 
 		return NextResponse.json({
 			success: true,
 			message: "Successfully unsubscribed from channel",
 		});
 	} catch (error) {
-		console.log("Error unsubscribing from channel:", error);
-
 		// Handle specific errors
 		if (error.code === "P2025") {
 			return NextResponse.json(

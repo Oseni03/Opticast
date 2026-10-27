@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import ChannelTable from "./components/channel-table";
 import Pagination from "@/components/pagination";
@@ -21,6 +21,8 @@ function Page() {
 	const [channels, setChannels] = useState([]);
 	const [isLoading, setLoading] = useState(false);
 	const [page, setPage] = useState(1);
+	const [totalPages, setTotalPages] = useState(1);
+	const [query, setQuery] = useState("");
 
 	// Fetch subscribed channels
 	useEffect(() => {
@@ -28,10 +30,14 @@ function Page() {
 			setLoading(true);
 			try {
 				const response = await fetch(`/api/channels?page=${page}`);
+				if (!response.ok) {
+					throw new Error("Failed to load channels.");
+				}
 				const data = await response.json();
-				setChannels(data.channels);
+				setChannels(data.channels || []);
+				setTotalPages(data.totalPages || 1);
 			} catch (error) {
-				toast.error("Failed to load channels.");
+				toast.error(error.message || "Failed to load channels.");
 			} finally {
 				setLoading(false);
 			}
@@ -40,9 +46,8 @@ function Page() {
 	}, [page]);
 
 	// Handle filtering
-	const handleFiltering = async (e) => {
-		const query = e.target.value.toLowerCase();
-		// Perform API call for filtering (omitted here for brevity)
+	const handleFiltering = (e) => {
+		setQuery(e.target.value.toLowerCase());
 	};
 
 	// Handle channel addition
@@ -55,12 +60,20 @@ function Page() {
 			});
 			if (!response.ok) throw new Error("Failed to add channel.");
 			const newChannel = await response.json();
-			setChannels((prev) => [...prev, newChannel]);
+			setChannels((prev) =>
+				prev.some((channel) => channel.id === newChannel.id)
+					? prev
+					: [...prev, newChannel]
+			);
 			toast.success("Channel added successfully!");
 		} catch (error) {
 			toast.error(error.message || "Failed to add channel.");
 		}
 	};
+
+	const filteredChannels = channels.filter((channel) =>
+		(channel.title || "").toLowerCase().includes(query)
+	);
 
 	return (
 		<div>
@@ -73,9 +86,17 @@ function Page() {
 					<Spinner />
 				</div>
 			) : (
-				<ChannelTable channels={channels} setChannels={setChannels} />
+				<ChannelTable
+					channels={filteredChannels}
+					setChannels={setChannels}
+				/>
 			)}
-			<Pagination page={page} setPage={setPage} isLoading={isLoading} />
+			<Pagination
+				page={page}
+				setPage={setPage}
+				isLoading={isLoading}
+				totalPages={totalPages}
+			/>
 		</div>
 	);
 }

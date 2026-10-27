@@ -14,8 +14,6 @@ import {
 	motion,
 	AnimatePresence,
 	MotionConfig,
-	Transition,
-	Variant,
 } from "framer-motion";
 import { createPortal } from "react-dom";
 import { cn } from "@/lib/utils";
@@ -229,45 +227,6 @@ function DialogSubtitle({ children, className, style }) {
 	);
 }
 
-// type DialogDescriptionProps = {
-//   children: React.ReactNode;
-//   className?: string;
-//   disableLayoutAnimation?: boolean;
-//   variants?: {
-//     initial: Variant;
-//     animate: Variant;
-//     exit: Variant;
-//   };
-// };
-
-function DialogDescription({
-	children,
-	className,
-	variants,
-	disableLayoutAnimation,
-}) {
-	const { uniqueId } = useDialog();
-
-	return (
-		<motion.div
-			key={`dialog-description-${uniqueId}`}
-			layoutId={
-				disableLayoutAnimation
-					? undefined
-					: `dialog-description-content-${uniqueId}`
-			}
-			variants={variants}
-			className={className}
-			initial="initial"
-			animate="animate"
-			exit="exit"
-			id={`dialog-description-${uniqueId}`}
-		>
-			{children}
-		</motion.div>
-	);
-}
-
 function DialogImage({ src, alt, className, style }) {
 	const { uniqueId } = useDialog();
 
@@ -281,16 +240,6 @@ function DialogImage({ src, alt, className, style }) {
 		/>
 	);
 }
-
-// type DialogCloseProps = {
-//   children?: React.ReactNode;
-//   className?: string;
-//   variants?: {
-//     initial: Variant;
-//     animate: Variant;
-//     exit: Variant;
-//   };
-// };
 
 function DialogClose({ children, className, variants }) {
 	const { setIsOpen, uniqueId } = useDialog();
@@ -324,6 +273,5 @@ export {
 	DialogClose,
 	DialogTitle,
 	DialogSubtitle,
-	DialogDescription,
 	DialogImage,
 };

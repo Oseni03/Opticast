@@ -1,4 +1,3 @@
-import React from "react";
 import { toast } from "react-toastify";
 import {
 	AlertDialog,
@@ -23,9 +22,9 @@ const ChannelDeleteDialog = ({ channelId, setter }) => {
 				setter((prevChannels) =>
 					prevChannels.filter((channel) => channel.id !== channelId)
 				);
-				toast.success("Channel deleted successfully!");
+				toast.success("Channel unsubscribed successfully!");
 			} else {
-				toast.error("Failed to delete channel.");
+				toast.error("Failed to unsubscribe from channel.");
 			}
 		} catch (error) {
 			toast.error("Error deleting channel.");
@@ -45,8 +44,8 @@ const ChannelDeleteDialog = ({ channelId, setter }) => {
 						Are you absolutely sure?
 					</AlertDialogTitle>
 					<AlertDialogDescription>
-						This action cannot be undone. This will permanently
-						delete the channel.
+						This action cannot be undone. You will stop syncing
+						videos from this channel.
 					</AlertDialogDescription>
 				</AlertDialogHeader>
 				<AlertDialogFooter>

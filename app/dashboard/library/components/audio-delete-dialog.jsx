@@ -1,4 +1,3 @@
-import React from "react";
 import { toast } from "react-toastify";
 import {
 	AlertDialog,
@@ -12,7 +11,7 @@ import {
 	AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { CircleX, Delete } from "lucide-react";
+import { CircleX } from "lucide-react";
 
 const AudioDeleteDialog = ({ audioId, setter }) => {
 	const handleDeleteAudio = async (videoId) => {
@@ -33,7 +32,7 @@ const AudioDeleteDialog = ({ audioId, setter }) => {
 				toast.error("Failed to delete audio: " + result.error);
 			}
 		} catch (error) {
-			toast.error(error);
+			toast.error(error.message || "Failed to delete audio.");
 		}
 	};
 

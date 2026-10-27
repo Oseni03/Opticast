@@ -10,30 +10,26 @@ export function FeedbackForm() {
 	const { data: session } = useSession();
 
 	const onSubmit = async ({ title, description }) => {
-		console.log("title", title);
+		if (!session?.user?.id) {
+			toast.error("You must be signed in to send feedback.");
+			return;
+		}
+
+		setError("");
 		try {
 			const res = await fetch("/api/feedback", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
 				},
-				body: JSON.stringify({
-					userId: session.user.id,
-					title,
-					description,
-				}),
+				body: JSON.stringify({ title, description }),
 			});
 
 			if (res.ok) {
-				if (result?.error) {
-					setError(result.error);
-					return;
-				}
-
 				toast.success("Feedback sent successful.");
 			} else {
 				const data = await res.json();
-				setError(data.error);
+				setError(data.error || "Failed to send feedback.");
 			}
 		} catch (error) {
 			setError(error.message);

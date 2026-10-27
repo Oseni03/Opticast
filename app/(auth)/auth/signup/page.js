@@ -1,25 +1,21 @@
 "use client";
-import { useState } from "react";
-import { signIn } from "next-auth/react";
+import { useEffect, useState } from "react";
+import { signIn, useSession } from "next-auth/react";
 import { UserAuthForm } from "../../components/user-auth-form";
 import AuthPage from "../../components/auth-page";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
-import { useSession } from "next-auth/react";
-
-// export const metadata = {
-// 	title: "Sign up",
-// 	description: "Authentication forms built using the components.",
-// };
 
 export default function Page() {
 	const router = useRouter();
 	const { data: session } = useSession();
-
-	if (session?.user) {
-		router.push("/dashboard");
-	}
 	const [globalError, setGlobalError] = useState("");
+
+	useEffect(() => {
+		if (session?.user) {
+			router.push("/dashboard");
+		}
+	}, [session, router]);
 
 	const handleSubmit = async ({ email, password }) => {
 		try {

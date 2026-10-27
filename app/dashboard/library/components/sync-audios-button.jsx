@@ -19,11 +19,19 @@ function SyncAudiosButton({ setAudios }) {
 			if (!response.ok) {
 				throw new Error(data.error || "Failed to sync videos.");
 			}
-			setAudios((prevAudios) => [...data, ...prevAudios]);
+			setAudios((prevAudios) => {
+				const existingIds = new Set(
+					prevAudios.map((audio) => audio.id)
+				);
+				const newAudios = data.filter(
+					(audio) => !existingIds.has(audio.id)
+				);
+				return [...newAudios, ...prevAudios];
+			});
 			toast.success("Videos synchronized successfully!");
 		} catch (error) {
 			console.log(error);
-			toast.error("An error occurred.");
+			toast.error(error.message || "An error occurred.");
 		} finally {
 			setIsLoading(false);
 		}

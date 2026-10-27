@@ -1,10 +1,21 @@
 import { syncUserChannelVideos } from "@/lib/youtube";
-import { prisma } from "@/lib/db"; // Assuming you have a Prisma client setup
+import { prisma } from "@/lib/db";
 
 export const dynamic = "force-dynamic"; // static by default, unless reading the request
 
-export async function GET(req) {
+export async function GET(request) {
 	try {
+		const cronSecret = process.env.CRON_SECRET;
+		if (
+			!cronSecret ||
+			request.headers.get("authorization") !== `Bearer ${cronSecret}`
+		) {
+			return new Response(JSON.stringify({ error: "Unauthorized" }), {
+				status: 401,
+				headers: { "Content-Type": "application/json" },
+			});
+		}
+
 		// Fetch all users from the database
 		const users = await prisma.user.findMany({
 			select: { id: true }, // Only fetch user IDs to minimize data

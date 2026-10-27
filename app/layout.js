@@ -3,7 +3,6 @@ import "./globals.css";
 import { ToastContainer } from "react-toastify";
 import { ThemeProvider } from "@/components/theme-provider";
 import AuthWrapper from "@/components/wrapper/auth-wrapper";
-import Provider from "./provider";
 import { siteConfig } from "@/config/site";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -25,36 +24,34 @@ export const metadata = {
 		template: `%s | ${siteConfig.name}`,
 	},
 	description: siteConfig.description,
+	keywords: siteConfig.keywords,
 
 	twitter: {
 		card: "summary_large_image",
 		title: siteConfig.name,
 		description: siteConfig.description,
 		creator: "@Oseni03",
-		creatorId: "",
 	},
 };
 
 export default function RootLayout({ children }) {
 	return (
-		<AuthWrapper>
-			<html lang="en" className="h-screen" suppressHydrationWarning>
-				<body
-					className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-				>
-					<Provider>
-						<ThemeProvider
-							attribute="class"
-							defaultTheme="system"
-							enableSystem
-							disableTransitionOnChange
-						>
-							<ToastContainer />
-							{children}
-						</ThemeProvider>
-					</Provider>
-				</body>
-			</html>
-		</AuthWrapper>
+		<html lang="en" className="h-screen" suppressHydrationWarning>
+			<body
+				className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+			>
+				<AuthWrapper>
+					<ThemeProvider
+						attribute="class"
+						defaultTheme="system"
+						enableSystem
+						disableTransitionOnChange
+					>
+						<ToastContainer />
+						{children}
+					</ThemeProvider>
+				</AuthWrapper>
+			</body>
+		</html>
 	);
 }

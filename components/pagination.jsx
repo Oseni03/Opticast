@@ -1,7 +1,6 @@
-import React from "react";
 import { Button } from "@/components/ui/button";
 
-const Pagination = ({ page, setPage, isLoading }) => (
+const Pagination = ({ page, setPage, isLoading, totalPages }) => (
 	<div className="flex my-3">
 		<div className="ml-auto space-x-2 ">
 			<Button
@@ -16,7 +15,10 @@ const Pagination = ({ page, setPage, isLoading }) => (
 				variant="outline"
 				size="sm"
 				onClick={() => setPage((prevPage) => prevPage + 1)}
-				disabled={isLoading}
+				disabled={
+					isLoading ||
+					(totalPages !== undefined && page >= totalPages)
+				}
 			>
 				Next
 			</Button>

@@ -1,20 +1,15 @@
 "use client";
 import {
-	Settings,
 	ChevronUp,
 	User2,
 	Music,
 	Tv,
-	Tags,
 	BarChart,
-	DollarSign,
 } from "lucide-react";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
-	DropdownMenuLabel,
-	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -32,12 +27,9 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ProfileDialog } from "./profile-dialog";
 import { Button } from "./ui/button";
-import { useSession } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import CreditBalanceCard from "./credit-balance-card";
 import { toast } from "react-toastify";
-import { signOut } from "next-auth/react";
-import { useState, useEffect } from "react";
-import { getUser, getUserSubscription } from "@/lib/actions";
 
 // Menu items.
 const items = [
@@ -83,10 +75,10 @@ export function AppSidebar() {
 							{items.map((item) => (
 								<SidebarMenuItem key={item.title}>
 									<SidebarMenuButton asChild>
-										<a href={item.url}>
+										<Link href={item.url}>
 											<item.icon />
 											<span>{item.title}</span>
-										</a>
+										</Link>
 									</SidebarMenuButton>
 								</SidebarMenuItem>
 							))}

@@ -1,14 +1,7 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { PlusCircle, MoreVertical } from "lucide-react";
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuSeparator,
-	DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { PlusCircle } from "lucide-react";
 import {
 	Dialog,
 	DialogTrigger,
@@ -21,7 +14,6 @@ import {
 } from "@/components/motion-ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { UrlDialog } from "../components/url-dialog";
-import { prisma } from "@/lib/db";
 import { useState, useEffect } from "react";
 import { UrlForm } from "../components/url-form";
 import { toast } from "react-toastify";
@@ -34,13 +26,14 @@ function Page() {
 	const [error, setError] = useState("");
 	const [isLoading, setLoading] = useState(false);
 	const [page, setPage] = useState(1);
-	const [query, setQuery] = useState(null);
+	const [totalPages, setTotalPages] = useState(1);
+	const [query, setQuery] = useState("");
 
 	useEffect(() => {
 		const fetchAudios = async () => {
 			try {
 				const response = await fetch(
-					`/api/videos?page=${page}&query=${query}`,
+					`/api/videos?page=${page}&query=${encodeURIComponent(query)}`,
 					{
 						method: "GET",
 					}
@@ -48,7 +41,8 @@ function Page() {
 
 				if (response.ok) {
 					const userVideos = await response.json();
-					setAudios(userVideos?.videos);
+					setAudios(userVideos?.videos || []);
+					setTotalPages(userVideos?.totalPages || 1);
 				} else {
 					console.log(
 						"Error fetching audio files:",
@@ -65,6 +59,7 @@ function Page() {
 
 	const handleSubmit = async ({ url }) => {
 		setLoading(true);
+		setError("");
 
 		try {
 			const response = await fetch("/api/videos", {
@@ -79,7 +74,12 @@ function Page() {
 
 			if (response.ok) {
 				// Update the audios state with the new video data
-				setAudios((prevAudios) => [data, ...prevAudios]);
+				setAudios((prevAudios) =>
+					prevAudios.some((audio) => audio.id === data.id)
+						? prevAudios
+						: [data, ...prevAudios]
+				);
+				toast.success("Audio added successfully.");
 			} else {
 				console.log("Error processing YouTube video:", data.error);
 				toast.info(data.error);
@@ -87,8 +87,8 @@ function Page() {
 			}
 		} catch (error) {
 			console.log("Error submitting YouTube video:", error);
-			toast.error(data.error);
-			setError(error);
+			toast.error(error.message || "Failed to add audio");
+			setError(error.message || "Failed to add audio");
 		} finally {
 			setLoading(false);
 		}
@@ -105,7 +105,10 @@ function Page() {
 			<div className="flex flex-col space-y-2 sm:flex-row sm:items-center justify-between mb-4">
 				<Input
 					placeholder="Filter library..."
-					onChange={(e) => setQuery(e.target.value.toLowerCase())}
+					onChange={(e) => {
+						setQuery(e.target.value.toLowerCase());
+						setPage(1);
+					}}
 					className="max-w-sm"
 				/>
 				<UrlDialog
@@ -212,6 +215,7 @@ function Page() {
 					page={page}
 					setPage={setPage}
 					isLoading={isLoading}
+					totalPages={totalPages}
 				/>
 			</div>
 		</>
