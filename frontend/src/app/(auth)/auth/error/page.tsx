@@ -35,7 +35,7 @@ function AuthErrorContent() {
 					<AlertCircleIcon className="size-10" />
 				</div>
 
-				<h1 className="text-3xl font-manrope font-bold text-primary tracking-tight mb-4">
+				<h1 className="text-3xl font-display font-bold text-primary tracking-tight mb-4">
 					{displayTitle}
 				</h1>
 

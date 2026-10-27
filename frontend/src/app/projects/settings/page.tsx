@@ -98,7 +98,7 @@ export default function AccountSettingsPage() {
 	if (isLoading || prefsLoading) {
 		return (
 			<div className="flex items-center justify-center min-h-[400px]">
-				<Loader2Icon className="size-12 animate-spin text-black dark:text-white" />
+				<Loader2Icon className="size-12 animate-spin text-[#14140a] dark:text-white" />
 			</div>
 		);
 	}
@@ -106,11 +106,11 @@ export default function AccountSettingsPage() {
 	return (
 		<div className="max-w-4xl mx-auto relative">
 			{showAlert && (
-				<div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/40 backdrop-blur-sm">
+				<div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-[#0a0a0a]/40 backdrop-blur-sm">
 					<div className="bg-surface-container-lowest rounded-3xl p-8 max-w-md w-full shadow-[0px_24px_48px_rgba(25,28,30,0.06)] border border-border">
 						<div className="flex items-center gap-4 mb-6 text-destructive">
 							<FileWarningIcon className="w-6 h-6" />
-							<h4 className="text-2xl font-manrope font-bold tracking-tight">
+							<h4 className="text-2xl font-display font-bold tracking-tight">
 								Danger Alert
 							</h4>
 						</div>
@@ -143,7 +143,7 @@ export default function AccountSettingsPage() {
 			)}
 
 			<header className="mb-6 md:mb-8 pb-4">
-				<h2 className="text-3xl font-manrope font-bold text-primary tracking-tight">
+				<h2 className="text-3xl font-display font-bold text-primary tracking-tight">
 					Account Settings
 				</h2>
 				<p className="text-muted-foreground mt-2 font-medium text-sm">
@@ -158,7 +158,7 @@ export default function AccountSettingsPage() {
 					id="profile"
 					className="bg-surface-container-lowest border border-border p-6 md:p-10 rounded-3xl shadow-[0px_12px_24px_rgba(25,28,30,0.04)]"
 				>
-					<h3 className="text-2xl md:text-3xl font-manrope font-bold mb-8 text-primary tracking-tight">
+					<h3 className="text-2xl md:text-3xl font-display font-bold mb-8 text-primary tracking-tight">
 						Profile
 					</h3>
 					<div className="flex flex-col md:flex-row gap-8 md:gap-12">
@@ -174,7 +174,7 @@ export default function AccountSettingsPage() {
 									className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
 									referrerPolicy="no-referrer"
 								/>
-								<div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer">
+								<div className="absolute inset-0 bg-[#0a0a0a]/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer">
 									<ImageIcon className="text-white w-8 h-8" />
 								</div>
 							</div>
@@ -248,7 +248,7 @@ export default function AccountSettingsPage() {
 					id="billing"
 					className="bg-surface-container-lowest border border-border p-6 md:p-10 rounded-3xl shadow-[0px_12px_24px_rgba(25,28,30,0.04)]"
 				>
-					<h3 className="text-2xl md:text-3xl font-manrope font-bold mb-8 text-primary tracking-tight">
+					<h3 className="text-2xl md:text-3xl font-display font-bold mb-8 text-primary tracking-tight">
 						Subscription
 					</h3>
 					<div className="p-6 md:p-8 bg-surface-container-low rounded-2xl flex flex-col xl:flex-row xl:justify-between items-start xl:items-center gap-6 xl:gap-8">
@@ -257,7 +257,7 @@ export default function AccountSettingsPage() {
 								<LockKeyhole className="w-7 h-7" />
 							</div>
 							<div>
-								<p className="text-xl md:text-2xl font-manrope font-bold text-primary tracking-tight capitalize">
+								<p className="text-xl md:text-2xl font-display font-bold text-primary tracking-tight capitalize">
 									{creator?.plan_tier} Plan
 								</p>
 								<p className="text-sm font-medium text-muted-foreground mt-1">
@@ -282,7 +282,7 @@ export default function AccountSettingsPage() {
 					id="notifications"
 					className="bg-surface-container-lowest border border-border p-6 md:p-10 rounded-3xl shadow-[0px_12px_24px_rgba(25,28,30,0.04)]"
 				>
-					<h3 className="text-2xl md:text-3xl font-manrope font-bold mb-8 text-primary tracking-tight">
+					<h3 className="text-2xl md:text-3xl font-display font-bold mb-8 text-primary tracking-tight">
 						Notifications
 					</h3>
 					<div className="space-y-6 md:space-y-8">
@@ -338,7 +338,7 @@ export default function AccountSettingsPage() {
 				</section>
 
 				<section className="bg-destructive/5 p-6 md:p-8 rounded-3xl border border-destructive/20">
-					<h3 className="text-lg md:text-xl font-manrope font-bold mb-3 text-destructive tracking-tight">
+					<h3 className="text-lg md:text-xl font-display font-bold mb-3 text-destructive tracking-tight">
 						Danger Zone
 					</h3>
 					<p className="text-sm font-medium text-destructive/80 mb-6 leading-relaxed">

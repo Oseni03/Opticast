@@ -23,7 +23,7 @@ export default function SuccessPage() {
 					<span className="absolute -top-2 -right-2 size-6 bg-primary rounded-full ring-4 ring-surface-container-lowest block" />
 				</div>
 
-				<h1 className="text-4xl font-manrope font-bold text-primary tracking-tight mb-4">
+				<h1 className="text-4xl font-display font-bold text-primary tracking-tight mb-4">
 					Well Done!
 				</h1>
 				<p className="text-muted-foreground mb-12 mt-3 font-medium text-sm leading-relaxed">

@@ -59,7 +59,7 @@ export default function AnalyticsPage() {
             {/* Header */}
             <div className="flex flex-col md:flex-row md:justify-between items-start md:items-center gap-6 md:gap-4 mb-8 md:mb-12 border-b border-border pb-6">
                 <div>
-                    <h1 className="text-3xl font-manrope font-bold text-primary tracking-tight mb-1 md:mb-0">Analytics</h1>
+                    <h1 className="text-3xl font-display font-bold text-primary tracking-tight mb-1 md:mb-0">Analytics</h1>
                     <p className="text-muted-foreground mt-2 font-medium text-sm">Real-time performance insights</p>
                 </div>
                 <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
@@ -82,7 +82,7 @@ export default function AnalyticsPage() {
                             </div>
                             <p className="text-muted-foreground text-sm font-semibold mb-3">{card.label}</p>
                             <div className="flex items-end justify-between relative z-10">
-                                <h3 className="text-4xl font-manrope font-bold tracking-tight text-primary">{card.value}</h3>
+                                <h3 className="text-4xl font-display font-bold tracking-tight text-primary">{card.value}</h3>
                                 <span className="text-primary/60 flex items-center gap-1 p-2 bg-primary/5 rounded-xl">
                                     {React.cloneElement(card.icon as React.ReactElement<{ className?: string }>, { className: 'w-5 h-5' })}
                                 </span>
@@ -95,7 +95,7 @@ export default function AnalyticsPage() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
                 <div className="lg:col-span-2 bg-surface-container-lowest p-8 rounded-3xl border border-border shadow-[0px_12px_24px_rgba(25,28,30,0.04)]">
                     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
-                        <h4 className="font-manrope font-bold text-xl text-primary tracking-tight">Downloads Over Time</h4>
+                        <h4 className="font-display font-bold text-xl text-primary tracking-tight">Downloads Over Time</h4>
                         <span className="text-xs font-semibold text-primary/60 bg-primary/5 px-3 py-1 rounded-full border border-primary/10">Chart coming soon</span>
                     </div>
                     <div className="h-64 flex items-center justify-center border-2 border-dashed border-border rounded-2xl bg-surface-container-lowest">
@@ -104,7 +104,7 @@ export default function AnalyticsPage() {
                 </div>
 
                 <div className="bg-surface-container-lowest p-8 rounded-3xl border border-border shadow-[0px_12px_24px_rgba(25,28,30,0.04)]">
-                    <h4 className="font-manrope font-bold text-xl text-primary tracking-tight mb-8">Geography</h4>
+                    <h4 className="font-display font-bold text-xl text-primary tracking-tight mb-8">Geography</h4>
                     <div className="relative h-40 w-full bg-surface-container-low rounded-2xl mb-8 flex items-center justify-center border border-border/50">
                         <p className="text-sm font-medium text-muted-foreground">Coming soon</p>
                     </div>
@@ -114,7 +114,7 @@ export default function AnalyticsPage() {
             {/* Top episodes table */}
             <div className="bg-surface-container-lowest rounded-3xl border border-border overflow-hidden shadow-[0px_12px_24px_rgba(25,28,30,0.04)] hidden md:block">
                 <div className="p-6 md:p-8 border-b border-border flex justify-between items-center bg-surface-container-low">
-                    <h4 className="font-manrope font-bold text-xl text-primary tracking-tight">Top Episodes by Downloads</h4>
+                    <h4 className="font-display font-bold text-xl text-primary tracking-tight">Top Episodes by Downloads</h4>
                 </div>
                 <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">

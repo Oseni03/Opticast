@@ -46,7 +46,7 @@ export default function NewEpisodePage() {
         <div className="max-w-5xl mx-auto">
             <header className="flex flex-col md:flex-row md:justify-between items-start md:items-center gap-6 md:gap-4 mb-8 pb-6">
                 <div>
-                    <h2 className="text-3xl font-manrope font-bold text-primary tracking-tight">Create Episode</h2>
+                    <h2 className="text-3xl font-display font-bold text-primary tracking-tight">Create Episode</h2>
                     <p className="text-muted-foreground mt-2 font-medium text-sm">Convert YouTube video to high-quality podcast</p>
                 </div>
                 <div className="flex flex-wrap gap-4 w-full md:w-auto">
@@ -70,7 +70,7 @@ export default function NewEpisodePage() {
                 <div className="lg:col-span-2 space-y-12">
                     <section>
                         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-                            <h3 className="text-2xl font-manrope font-bold text-primary flex items-center gap-3 tracking-tight">
+                            <h3 className="text-2xl font-display font-bold text-primary flex items-center gap-3 tracking-tight">
                                 <ListVideoIcon className="w-6 h-6 text-primary/80" />
                                 Select Video
                             </h3>
@@ -131,7 +131,7 @@ export default function NewEpisodePage() {
                     </section>
 
                     <section className="bg-surface-container-lowest p-8 rounded-3xl border border-border shadow-[0px_12px_24px_rgba(25,28,30,0.04)]">
-                        <h3 className="text-2xl font-manrope font-bold mb-8 text-primary tracking-tight">Episode Details</h3>
+                        <h3 className="text-2xl font-display font-bold mb-8 text-primary tracking-tight">Episode Details</h3>
                         <div className="space-y-6">
                             <div className="space-y-2">
                                 <label className="block text-sm font-semibold text-muted-foreground ml-1">Episode Title</label>
@@ -190,7 +190,7 @@ export default function NewEpisodePage() {
                                     <PlayIcon className="text-muted-foreground/30 w-12 h-12" />
                                 </div>
                             )}
-                            <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 hover:opacity-100 transition-opacity backdrop-blur-[2px]">
+                            <div className="absolute inset-0 flex items-center justify-center bg-[#0a0a0a]/30 opacity-0 hover:opacity-100 transition-opacity backdrop-blur-[2px]">
                                 <button className="bg-white/20 backdrop-blur-md rounded-full size-14 flex items-center justify-center text-white border border-white/30 shadow-lg hover:bg-white/30 transition-colors">
                                     <PlayIcon className="w-6 h-6 ml-1" />
                                 </button>

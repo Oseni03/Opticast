@@ -71,7 +71,7 @@ export default function ProjectDashboardPage() {
                 <div className="size-20 bg-destructive/10 rounded-full flex items-center justify-center mx-auto mb-6">
                     <Settings2Icon className="size-10 text-destructive" />
                 </div>
-                <h2 className="text-2xl font-manrope font-bold text-primary mb-2">Project not found</h2>
+                <h2 className="text-2xl font-display font-bold text-primary mb-2">Project not found</h2>
                 <p className="text-muted-foreground mb-8 text-sm">We couldn't load the details for this project. It might have been deleted or the ID is incorrect.</p>
                 <Button asChild variant="outline">
                     <Link href="/projects">Back to Projects</Link>
@@ -96,7 +96,7 @@ export default function ProjectDashboardPage() {
                             {channel.monitoring_active ? 'Active' : 'Paused'}
                         </span>
                     </div>
-                    <h2 className="text-4xl font-manrope font-bold text-primary tracking-tight leading-tight">{channel.podcast_title || channel.channel_title}</h2>
+                    <h2 className="text-4xl font-display font-bold text-primary tracking-tight leading-tight">{channel.podcast_title || channel.channel_title}</h2>
                     <p className="text-muted-foreground mt-2 font-medium text-sm line-clamp-2 max-w-2xl">{channel.podcast_description || 'No description provided.'}</p>
                 </div>
                 <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto shrink-0">
@@ -139,7 +139,7 @@ export default function ProjectDashboardPage() {
                                 </span>
                             </div>
                             <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-1">Total Downloads</p>
-                            <p className="text-5xl font-manrope font-bold text-primary tracking-tight">
+                            <p className="text-5xl font-display font-bold text-primary tracking-tight">
                                 {totalDownloads >= 1000
                                     ? `${(totalDownloads / 1000).toFixed(1)}k`
                                     : totalDownloads.toLocaleString()}
@@ -166,7 +166,7 @@ export default function ProjectDashboardPage() {
                                 </span>
                             </div>
                             <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-1">Total Episodes</p>
-                            <p className="text-5xl font-manrope font-bold text-primary tracking-tight">{totalEpisodes}</p>
+                            <p className="text-5xl font-display font-bold text-primary tracking-tight">{totalEpisodes}</p>
                             <p className="text-xs font-semibold text-muted-foreground/60 mt-4 flex items-center gap-1.5 uppercase tracking-tighter">
                                 <CheckIcon className="size-3" /> Synced and indexed
                             </p>
@@ -182,7 +182,7 @@ export default function ProjectDashboardPage() {
                     <div className="bg-surface-container-lowest shadow-[0px_12px_24px_rgba(25,28,30,0.04)] rounded-3xl p-6 border border-border overflow-hidden">
                         <div className="flex items-center gap-2 mb-6">
                             <Rss className="size-5 text-primary" />
-                            <h3 className="text-lg font-manrope font-bold text-primary tracking-tight">RSS Feed</h3>
+                            <h3 className="text-lg font-display font-bold text-primary tracking-tight">RSS Feed</h3>
                         </div>
                         
                         <p className="text-xs font-medium text-muted-foreground mb-4">Your public podcast feed URL:</p>
@@ -193,7 +193,7 @@ export default function ProjectDashboardPage() {
                             </div>
                             <button
                                 onClick={() => copyToClipboard(channel.rss_feed_url)}
-                                className={`w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold transition-all ${copied ? 'bg-success text-success-foreground' : 'bg-primary text-primary-foreground hover:shadow-lg hover:-translate-y-0.5'}`}
+                                className={`w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold transition-all ${copied ? 'bg-[#c8f135] text-[#403e0a]' : 'bg-[#403e0a] text-[#c8f135] hover:shadow-lg hover:-translate-y-0.5'}`}
                             >
                                 {copied ? <><CheckIcon className="size-4" /> Copied!</> : <><CopyIcon className="size-4" /> Copy RSS URL</>}
                             </button>
@@ -225,7 +225,7 @@ export default function ProjectDashboardPage() {
                                 <div className="p-2 bg-surface-container border border-border rounded-lg">
                                     <Mic2Icon className="size-5 text-primary" />
                                 </div>
-                                <h3 className="text-2xl font-manrope font-bold text-primary tracking-tight">Recent Episodes</h3>
+                                <h3 className="text-2xl font-display font-bold text-primary tracking-tight">Recent Episodes</h3>
                             </div>
                             <Link 
                                 href={`/projects/${projectId}/episodes`} 
@@ -266,7 +266,7 @@ export default function ProjectDashboardPage() {
                                                     {episode.duration_formatted}
                                                 </span>
                                                 <span className={`text-[9px] px-1.5 py-0.5 rounded-md font-bold uppercase tracking-widest ${
-                                                    episode.processing_status === 'done' ? 'bg-success/10 text-success' : 
+                                                    episode.processing_status === 'done' ? 'bg-[#c8f135]/10 text-[#c8f135]' : 
                                                     episode.processing_status === 'failed' ? 'bg-destructive/10 text-destructive' : 
                                                     'bg-accent/10 text-accent'
                                                 }`}>

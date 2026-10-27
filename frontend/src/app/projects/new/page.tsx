@@ -113,7 +113,7 @@ export default function NewProjectPage() {
                     <ArrowLeft className="size-4 group-hover:-translate-x-1 transition-transform" />
                     Back to Projects
                 </Link>
-                <h1 className="text-4xl font-manrope font-bold text-primary tracking-tight">Create New Project</h1>
+                <h1 className="text-4xl font-display font-bold text-primary tracking-tight">Create New Project</h1>
                 <p className="text-muted-foreground mt-2 font-medium">Turn your YouTube channel into a podcast feed.</p>
             </header>
 
@@ -134,7 +134,7 @@ export default function NewProjectPage() {
                 {step === 'select-channel' ? (
                     <div className="p-8 md:p-12">
                         <div className="mb-8">
-                            <h2 className="text-2xl font-manrope font-bold text-primary mb-2">Select your YouTube Channel</h2>
+                            <h2 className="text-2xl font-display font-bold text-primary mb-2">Select your YouTube Channel</h2>
                             <p className="text-muted-foreground font-medium">Choose from your connected YouTube account.</p>
                         </div>
 
@@ -219,7 +219,7 @@ export default function NewProjectPage() {
                 ) : (
                     <div className="p-8 md:p-12">
                         <div className="mb-10">
-                            <h2 className="text-2xl font-manrope font-bold text-primary mb-2">Configure Podcast Feed</h2>
+                            <h2 className="text-2xl font-display font-bold text-primary mb-2">Configure Podcast Feed</h2>
                             <p className="text-muted-foreground font-medium">How your podcast will appear on Apple Podcasts, Spotify, and more.</p>
                         </div>
 

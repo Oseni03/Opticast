@@ -72,7 +72,7 @@ export default function ProjectSettingsPage() {
     if (isLoading) {
         return (
             <div className="flex items-center justify-center min-h-[400px]">
-                <Loader2Icon className="size-12 animate-spin text-black dark:text-white" />
+                <Loader2Icon className="size-12 animate-spin text-[#14140a] dark:text-white" />
             </div>
         );
     }
@@ -80,7 +80,7 @@ export default function ProjectSettingsPage() {
     return (
         <div className="max-w-4xl mx-auto relative">
             <header className="mb-6 md:mb-8 pb-4">
-                <h2 className="text-3xl font-manrope font-bold text-primary tracking-tight">Project Settings</h2>
+                <h2 className="text-3xl font-display font-bold text-primary tracking-tight">Project Settings</h2>
                 <p className="text-muted-foreground mt-2 font-medium text-sm">Configure your podcast feed and channel preferences</p>
             </header>
 
@@ -91,7 +91,7 @@ export default function ProjectSettingsPage() {
                 <section className="bg-surface-container-lowest border border-border p-6 md:p-10 rounded-3xl shadow-[0px_12px_24px_rgba(25,28,30,0.04)]">
                     <div className="flex items-center gap-3 mb-8">
                         <Settings2Icon className="size-6 text-primary" />
-                        <h3 className="text-2xl md:text-3xl font-manrope font-bold text-primary tracking-tight">General</h3>
+                        <h3 className="text-2xl md:text-3xl font-display font-bold text-primary tracking-tight">General</h3>
                     </div>
 
                     <div className="space-y-6">
@@ -121,7 +121,7 @@ export default function ProjectSettingsPage() {
                 <section className="bg-surface-container-lowest border border-border p-6 md:p-10 rounded-3xl shadow-[0px_12px_24px_rgba(25,28,30,0.04)]">
                     <div className="flex items-center gap-3 mb-8">
                         <GlobeIcon className="size-6 text-primary" />
-                        <h3 className="text-2xl md:text-3xl font-manrope font-bold text-primary tracking-tight">Feed Configuration</h3>
+                        <h3 className="text-2xl md:text-3xl font-display font-bold text-primary tracking-tight">Feed Configuration</h3>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -187,7 +187,7 @@ export default function ProjectSettingsPage() {
                 <section className="bg-surface-container-lowest border border-border p-6 md:p-10 rounded-3xl shadow-[0px_12px_24px_rgba(25,28,30,0.04)]">
                     <div className="flex items-center gap-3 mb-8">
                         <Mic2Icon className="size-6 text-primary" />
-                        <h3 className="text-2xl md:text-3xl font-manrope font-bold text-primary tracking-tight">Episode Formatting</h3>
+                        <h3 className="text-2xl md:text-3xl font-display font-bold text-primary tracking-tight">Episode Formatting</h3>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -243,7 +243,7 @@ export default function ProjectSettingsPage() {
                     <section className="bg-destructive/5 p-6 md:p-8 rounded-3xl border border-destructive/20 mt-12">
                         <div className="flex items-center gap-3 mb-4 text-destructive">
                             <Trash2Icon className="size-5" />
-                            <h3 className="text-lg md:text-xl font-manrope font-bold tracking-tight">Danger Zone</h3>
+                            <h3 className="text-lg md:text-xl font-display font-bold tracking-tight">Danger Zone</h3>
                         </div>
                         <p className="text-sm font-medium text-destructive/80 mb-6 leading-relaxed">
                             Deleting this project will permanently remove the RSS feed and all associated episode data. This action cannot be undone.
@@ -256,11 +256,11 @@ export default function ProjectSettingsPage() {
                         </AlertDialogTrigger>
                     </section>
                     <AlertDialogContent>
-                        <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/40 backdrop-blur-sm">
+                        <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-[#0a0a0a]/40 backdrop-blur-sm">
                             <div className="bg-surface-container-lowest rounded-3xl p-8 max-w-md w-full shadow-[0px_24px_48px_rgba(25,28,30,0.06)] border border-border">
                                 <div className="flex items-center gap-4 mb-6 text-destructive">
                                     <FileWarningIcon className="w-6 h-6" />
-                                    <h4 className="text-2xl font-manrope font-bold tracking-tight">Delete Project</h4>
+                                    <h4 className="text-2xl font-display font-bold tracking-tight">Delete Project</h4>
                                 </div>
                                 <p className="text-muted-foreground text-sm font-medium mb-8 leading-relaxed">
                                     Are you sure you want to delete <strong>{channel?.podcast_title || channel?.channel_title}</strong>? This action is permanent and will delete all associated episodes and the RSS feed.

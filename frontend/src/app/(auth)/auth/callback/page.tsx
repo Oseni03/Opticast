@@ -43,7 +43,7 @@ function AuthCallbackContent() {
         <div className="min-h-screen bg-surface-container-lowest flex items-center justify-center p-6">
             <div className="flex flex-col items-center gap-4">
                 <div className="w-12 h-12 rounded-full border-4 border-primary border-t-transparent animate-spin" />
-                <p className="text-primary text-base font-semibold font-manrope tracking-wide">Connecting YouTube...</p>
+                <p className="text-primary text-base font-semibold font-display tracking-wide">Connecting YouTube...</p>
             </div>
         </div>
     );

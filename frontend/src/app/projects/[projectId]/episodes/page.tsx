@@ -18,11 +18,11 @@ const STATUS_LABELS: Record<EpisodeListItem['processing_status'], string> = {
 };
 
 const STATUS_COLORS: Record<EpisodeListItem['processing_status'], string> = {
-    queued: 'bg-slate-100 dark:bg-slate-800',
-    processing: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
-    done: 'bg-black text-white dark:bg-white dark:text-black',
-    failed: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
-    skipped: 'bg-slate-100 text-slate-500',
+    queued: 'bg-[#f5f1e0] text-[#5a5a66]',
+    processing: 'bg-[#c8f135] text-[#403e0a]',
+    done: 'bg-[#0a0a0a] text-white dark:bg-[#0a0a0a] dark:text-white',
+    failed: 'bg-[#f65858]/10 text-[#f65858] dark:bg-[#f65858]/20 dark:text-[#f65858]',
+    skipped: 'bg-[#f5f1e0] text-[#5a5a66]',
 };
 
 function SkeletonRow() {
@@ -60,11 +60,11 @@ export default function EpisodesPage() {
         <div className="max-w-7xl mx-auto">
             {/* Detail modal */}
             {selectedEpisode && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/40 backdrop-blur-sm">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-[#0a0a0a]/40 backdrop-blur-sm">
                     <div className="bg-surface-container-lowest border border-border p-8 md:p-10 max-w-2xl w-full rounded-3xl shadow-[0px_24px_48px_rgba(25,28,30,0.06)]">
                         <div className="flex justify-between items-start mb-8">
                             <div>
-                                <h4 className="text-3xl font-manrope font-bold tracking-tight text-primary">{selectedEpisode.title}</h4>
+                                <h4 className="text-3xl font-display font-bold tracking-tight text-primary">{selectedEpisode.title}</h4>
                                 <p className="text-muted-foreground text-sm font-medium mt-2">Episode Details</p>
                             </div>
                             <button
@@ -78,11 +78,11 @@ export default function EpisodesPage() {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                             <div className="p-6 bg-surface-container-low rounded-2xl">
                                 <p className="text-sm font-semibold text-muted-foreground mb-2">Total Downloads</p>
-                                <p className="text-4xl font-manrope font-bold text-primary">{selectedEpisode.download_count.toLocaleString()}</p>
+                                <p className="text-4xl font-display font-bold text-primary">{selectedEpisode.download_count.toLocaleString()}</p>
                             </div>
                             <div className="p-6 bg-surface-container-low rounded-2xl">
                                 <p className="text-sm font-semibold text-muted-foreground mb-2">Status</p>
-                                <p className="text-2xl font-manrope font-bold text-primary">{STATUS_LABELS[selectedEpisode.processing_status]}</p>
+                                <p className="text-2xl font-display font-bold text-primary">{STATUS_LABELS[selectedEpisode.processing_status]}</p>
                             </div>
                         </div>
 
@@ -103,7 +103,7 @@ export default function EpisodesPage() {
                             <button
                                 onClick={() => retryMutation.mutate(selectedEpisode.id)}
                                 disabled={retryMutation.isPending}
-                                className="w-full py-4 mb-4 bg-surface-container-high text-primary font-semibold text-sm rounded-xl hover:bg-surface-container-highest transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+                                className="w-full py-4 mb-4 bg-[#f5f1e0] text-[#14140a] font-semibold text-sm rounded-xl hover:bg-[#e7e4d6] transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
                             >
                                 <RefreshCwIcon className="w-4 h-4" />
                                 {retryMutation.isPending ? 'Queuing…' : 'Retry Processing'}
@@ -123,7 +123,7 @@ export default function EpisodesPage() {
             {/* Header */}
             <header className="flex flex-col md:flex-row md:justify-between items-start md:items-end gap-6 mb-8 pb-6">
                 <div>
-                    <h2 className="text-3xl font-manrope font-bold text-primary tracking-tight">Episodes</h2>
+                    <h2 className="text-3xl font-display font-bold text-primary tracking-tight">Episodes</h2>
                     <p className="text-muted-foreground mt-2 font-medium text-sm">
                         {isLoading ? 'Loading…' : `${data?.count ?? 0} episode${(data?.count ?? 0) !== 1 ? 's' : ''}`}
                     </p>

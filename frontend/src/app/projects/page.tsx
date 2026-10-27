@@ -66,7 +66,7 @@ export default function GlobalProjectsOverviewPage() {
 		<div className="max-w-5xl mx-auto p-8">
 			<header className="flex flex-col md:flex-row md:justify-between items-start md:items-end gap-6 mb-10 pt-8">
 				<div>
-					<h2 className="text-4xl font-manrope font-bold text-primary tracking-tight leading-none">
+					<h2 className="text-4xl font-display font-bold text-primary tracking-tight leading-none">
 						Your Projects
 					</h2>
 					<p className="text-muted-foreground mt-4 font-semibold text-xs uppercase tracking-widest">
@@ -109,13 +109,13 @@ export default function GlobalProjectsOverviewPage() {
 			{!meLoading && !isYouTubeConnected ? (
 				<section className="mb-12">
 					<div className="relative overflow-hidden rounded-2xl bg-surface-container shadow-[0px_24px_48px_rgba(25,28,30,0.06)] p-8 md:p-10 flex flex-col md:flex-row items-center justify-between gap-8 group">
-						<div className="absolute inset-0 bg-[#FF0000]/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+						<div className="absolute inset-0 bg-[#f65858]/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
 						<div className="flex flex-col md:flex-row items-center md:items-start text-center md:text-left gap-6 w-full relative z-10">
-							<div className="size-16 rounded-xl bg-[#FF0000] flex items-center justify-center text-white shrink-0 shadow-lg">
+							<div className="size-16 rounded-xl bg-[#f65858] flex items-center justify-center text-white shrink-0 shadow-lg">
 								<Youtube className="size-8" />
 							</div>
 							<div className="pt-2">
-								<h3 className="text-2xl font-manrope font-bold text-primary">
+								<h3 className="text-2xl font-display font-bold text-primary">
 									Connect your YouTube Account
 								</h3>
 								<p className="text-muted-foreground max-w-xl text-base mt-2">
@@ -127,7 +127,7 @@ export default function GlobalProjectsOverviewPage() {
 						</div>
 						<Link
 							href="/onboarding"
-							className="w-full md:w-auto whitespace-nowrap px-8 py-4 bg-[#FF0000] text-white rounded-lg font-semibold shadow-md hover:shadow-lg hover:-translate-y-1 transition-all text-center relative z-10"
+							className="w-full md:w-auto whitespace-nowrap px-8 py-4 bg-[#f65858] text-white rounded-lg font-semibold shadow-md hover:shadow-lg hover:-translate-y-1 transition-all text-center relative z-10"
 						>
 							Connect YouTube
 						</Link>
@@ -144,7 +144,7 @@ export default function GlobalProjectsOverviewPage() {
 								<Youtube className="size-8" />
 							</div>
 							<div className="pt-2">
-								<h3 className="text-2xl font-manrope font-bold text-primary">
+								<h3 className="text-2xl font-display font-bold text-primary">
 									Connect your YouTube Channel
 								</h3>
 								<p className="text-muted-foreground max-w-xl text-base mt-2">
@@ -182,7 +182,7 @@ export default function GlobalProjectsOverviewPage() {
 										Live
 									</span>
 								</div>
-								<p className="text-5xl font-manrope font-bold text-primary tracking-tight">
+								<p className="text-5xl font-display font-bold text-primary tracking-tight">
 									{totalDownloads >= 1000
 										? `${(totalDownloads / 1000).toFixed(1)}k`
 										: totalDownloads.toLocaleString()}
@@ -208,7 +208,7 @@ export default function GlobalProjectsOverviewPage() {
 										Live
 									</span>
 								</div>
-								<p className="text-5xl font-manrope font-bold text-primary tracking-tight">
+								<p className="text-5xl font-display font-bold text-primary tracking-tight">
 									{totalEpisodes}
 								</p>
 								<p className="text-xs font-medium text-muted-foreground mt-3 uppercase tracking-wider">
@@ -230,7 +230,7 @@ export default function GlobalProjectsOverviewPage() {
 								{channelsLoading ? "—" : "Live"}
 							</span>
 						</div>
-						<p className="text-5xl font-manrope font-bold text-primary tracking-tight">
+						<p className="text-5xl font-display font-bold text-primary tracking-tight">
 							{totalChannels}
 						</p>
 					</div>
@@ -240,7 +240,7 @@ export default function GlobalProjectsOverviewPage() {
 			{/* Active Feeds table */}
 			<section className="pb-20">
 				<div className="flex items-center justify-between mb-8">
-					<h3 className="text-3xl font-manrope font-bold text-primary">
+					<h3 className="text-3xl font-display font-bold text-primary">
 						Active Projects
 					</h3>
 				</div>
@@ -294,12 +294,12 @@ export default function GlobalProjectsOverviewPage() {
 												className="px-8 py-20 text-center"
 											>
 												<div
-													className={`size-16 rounded-full flex items-center justify-center mx-auto mb-6 ${isYouTubeConnected ? "bg-muted" : "bg-[#FF0000]/10"}`}
+													className={`size-16 rounded-full flex items-center justify-center mx-auto mb-6 ${isYouTubeConnected ? "bg-[#f5f1e0]" : "bg-[#f65858]/10"}`}
 												>
 													{isYouTubeConnected ? (
 														<Rss className="size-8 text-muted-foreground" />
 													) : (
-														<Youtube className="size-8 text-[#FF0000]" />
+														<Youtube className="size-8 text-[#f65858]" />
 													)}
 												</div>
 												<p className="text-lg font-semibold text-primary mb-2">
@@ -321,7 +321,7 @@ export default function GlobalProjectsOverviewPage() {
 													className={`inline-block px-8 py-3 font-semibold rounded-lg shadow-md hover:shadow-lg transition-all ${
 														isYouTubeConnected
 															? "bg-linear-to-br from-primary to-primary-container text-primary-foreground"
-															: "bg-[#FF0000] text-white"
+															: "bg-[#f65858] text-white"
 													}`}
 												>
 													{isYouTubeConnected
@@ -366,7 +366,7 @@ export default function GlobalProjectsOverviewPage() {
 										<td className="px-6 md:px-8 py-6">
 											<span className="flex items-center gap-2 text-sm font-medium whitespace-nowrap">
 												<span
-													className={`size-2.5 rounded-full ${channel.monitoring_active ? "bg-[#5516be] shadow-[0_0_8px_rgba(85,22,190,0.5)]" : "bg-muted-foreground"}`}
+													className={`size-2.5 rounded-full ${channel.monitoring_active ? "bg-[#b9a4f2] shadow-[0_0_8px_rgba(185,164,242,0.5)]" : "bg-muted-foreground"}`}
 												/>
 												{channel.monitoring_active
 													? "Active"
