@@ -1,36 +1,558 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# 🎙️ Opticast
+
+> **Turn any YouTube channel into a podcast — automatically.**
+
+Opticast is a creator-permissioned SaaS platform that converts YouTube video content into podcast-quality audio episodes distributed via RSS feeds to Spotify, Apple Podcasts, Amazon Music, and every other major platform.
+
+Unlike audio-ripping tools, Opticast operates entirely within YouTube's Terms of Service — every channel is processed only after the creator explicitly authorises it via Google OAuth.
+
+---
+
+## Table of Contents
+
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Project Structure](#project-structure)
+- [Prerequisites](#prerequisites)
+- [Getting Started](#getting-started)
+- [Environment Variables](#environment-variables)
+- [Running with Docker](#running-with-docker)
+- [Running Locally (without Docker)](#running-locally-without-docker)
+- [Celery Setup](#celery-setup)
+- [API Overview](#api-overview)
+- [Background Tasks](#background-tasks)
+- [Deployment](#deployment)
+
+---
+
+## Features
+
+- **Google OAuth onboarding** — creators connect their YouTube channel in under 5 minutes
+- **Real-time video detection** — YouTube WebSub (PubSubHubbub) push notifications with a polling fallback every 15 minutes
+- **Automated audio pipeline** — yt-dlp extraction → FFmpeg loudness normalisation to –16 LUFS → Cloudinary storage
+- **RSS 2.0 feed generation** — full Apple Podcasts namespace + Podcasting 2.0 support (chapters, transcripts, funding)
+- **Directory submission wizard** — guided one-click submission to Spotify, Apple Podcasts, and Amazon Music
+- **IABv2 analytics** — downloads, geographic breakdown, podcast app breakdown, weekly email digest
+- **Tiered subscriptions** — Free, Starter, Pro, and Agency plans via Polar.sh
+- **Creator dashboard** — episode manager, feed settings, filter config, and billing — all in one place
+
+---
+
+## Tech Stack
+
+| Layer            | Technology                                      |
+| ---------------- | ----------------------------------------------- |
+| Frontend         | Next.js 14, TypeScript, Tailwind CSS, shadcn/ui |
+| Backend          | Django 5, Django REST Framework                 |
+| Auth             | Google OAuth 2.0, JWT (SimpleJWT)               |
+| Task queue       | Celery + django-celery-beat                     |
+| Message broker   | Redis                                           |
+| Database         | PostgreSQL 15                                   |
+| Cache            | Redis                                           |
+| Audio processing | yt-dlp, FFmpeg                                  |
+| Storage          | Cloudinary                                      |
+| Billing          | Polar.sh                                        |
+| Containerisation | Docker, Docker Compose                          |
+
+---
+
+## Project Structure
+``
+```
+opticast/
+├── docker-compose.yml
+├── .env.example
+├── .gitignore
+├── README.md
+│
+├── backend/                        # Django project
+│   ├── Dockerfile
+│   ├── requirements.txt
+│   ├── manage.py
+│   ├── config/                     # Django project config
+│   │   ├── settings.py
+│   │   ├── urls.py
+│   │   ├── celery.py
+│   │   └── wsgi.py
+│   ├── apps/
+│   │   ├── accounts/               # Google OAuth, JWT, Creator model
+│   │   ├── channels/               # YouTube channel management, WebSub
+│   │   ├── episodes/               # Audio extraction pipeline
+│   │   ├── feeds/                  # RSS feed generation
+│   │   ├── analytics/              # IABv2 download analytics
+│   │   └── billing/                # Polar.sh subscriptions
+│   └── tasks/                      # Celery task definitions
+│
+└── frontend/                       # Next.js app
+    ├── Dockerfile
+    ├── package.json
+    ├── app/                        # App Router pages
+    ├── components/
+    ├── lib/
+    ├── hooks/
+    └── types/
+```
+
+---
+
+## Prerequisites
+
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) (recommended)
+- Or, for local development without Docker:
+    - Python 3.11+
+    - Node.js 18+
+    - PostgreSQL 15
+    - Redis 7
+    - FFmpeg (`brew install ffmpeg` / `apt install ffmpeg`)
+
+---
 
 ## Getting Started
 
-First, run the development server:
+### 1. Clone the repo
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/Oseni03/opticast.git
+cd opticast
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Set up environment variables
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+```bash
+cp .env.example .env
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Open `.env` and fill in the required values. See [Environment Variables](#environment-variables) for details.
 
-## Learn More
+### 3. Start with Docker
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+docker-compose up --build
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+The first run will build images, run Django migrations, and start all services — including the Celery worker, beat scheduler, and Flower monitor.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+| Service               | URL                         |
+| --------------------- | --------------------------- |
+| Frontend              | http://localhost:3000       |
+| Backend API           | http://localhost:8000/api   |
+| Django Admin          | http://localhost:8000/admin |
+| Flower (task monitor) | http://localhost:5555       |
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Environment Variables
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Copy `.env.example` to `.env` and fill in all values before starting the project.
+
+```bash
+# Django core
+SECRET_KEY=
+DEBUG=True
+ALLOWED_HOSTS=localhost 127.0.0.1
+DJANGO_SETTINGS_MODULE=config.settings
+
+# PostgreSQL
+DB_NAME=opticast
+DB_USER=postgres
+DB_PASSWORD=postgres
+DB_HOST=db          # use 'localhost' when running without Docker
+DB_PORT=5432
+
+# Redis
+REDIS_URL=redis://redis:6379/0        # use redis://localhost:6379/0 without Docker
+CELERY_BROKER_URL=redis://redis:6379/1
+CELERY_RESULT_BACKEND=redis://redis:6379/2
+
+# Google OAuth — https://console.cloud.google.com
+GOOGLE_OAUTH_CLIENT_ID=
+GOOGLE_OAUTH_CLIENT_SECRET=
+GOOGLE_OAUTH_REDIRECT_URI=http://localhost:8000/api/auth/google/callback/
+
+# Cloudinary — https://cloudinary.com
+CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
+
+# Polar.sh billing — https://polar.sh/dashboard
+POLAR_ACCESS_TOKEN=polar_oat_...
+POLAR_WEBHOOK_SECRET=
+POLAR_PRODUCT_STARTER=
+POLAR_PRODUCT_PRO=
+POLAR_PRODUCT_AGENCY=
+
+# WebSub — must be a publicly reachable URL (use ngrok in dev)
+WEBSUB_CALLBACK_URL=https://your-ngrok-url.ngrok.io/api/channels/websub/callback/
+
+# Frontend
+FRONTEND_URL=http://localhost:3000
+CORS_ALLOWED_ORIGINS=http://localhost:3000
+NEXT_PUBLIC_API_URL=http://localhost:8000/api
+```
+
+> ⚠️ When running **without Docker**, change `DB_HOST` to `localhost` and all Redis URLs from `redis://redis:...` to `redis://localhost:...`.
+
+---
+
+## Running with Docker
+
+The Docker Compose setup runs the full stack: Django, Next.js, PostgreSQL, Redis, Celery worker, Celery Beat scheduler, and Flower — all wired together automatically.
+
+### `docker-compose.yml`
+
+```yaml
+services:
+    backend:
+        build: ./backend
+        command: python manage.py runserver 0.0.0.0:8000
+        volumes:
+            - ./backend:/app
+        ports:
+            - "8000:8000"
+        env_file:
+            - .env
+        depends_on:
+            - db
+            - redis
+
+    frontend:
+        build: ./frontend
+        command: npm run dev
+        volumes:
+            - ./frontend:/app
+        ports:
+            - "3000:3000"
+        env_file:
+            - .env
+        depends_on:
+            - backend
+
+    db:
+        image: postgres:15
+        environment:
+            POSTGRES_DB: opticast
+            POSTGRES_USER: postgres
+            POSTGRES_PASSWORD: postgres
+        ports:
+            - "5432:5432"
+        volumes:
+            - postgres_data:/var/lib/postgresql/data
+
+    redis:
+        image: redis:7-alpine
+        ports:
+            - "6379:6379"
+
+    celery_worker:
+        build: ./backend
+        command: celery -A config worker --loglevel=info --concurrency=2
+        volumes:
+            - ./backend:/app
+        env_file:
+            - .env
+        depends_on:
+            - redis
+            - db
+
+    celery_beat:
+        build: ./backend
+        command: celery -A config beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+        volumes:
+            - ./backend:/app
+        env_file:
+            - .env
+        depends_on:
+            - redis
+            - db
+
+    flower:
+        build: ./backend
+        command: celery -A config flower --port=5555
+        ports:
+            - "5555:5555"
+        env_file:
+            - .env
+        depends_on:
+            - redis
+
+volumes:
+    postgres_data:
+```
+
+### Start all services
+
+```bash
+docker-compose up --build
+```
+
+### Run in the background
+
+```bash
+docker-compose up -d
+```
+
+### Run Django management commands
+
+```bash
+# Migrations
+docker-compose exec backend python manage.py migrate
+
+# Create a superuser
+docker-compose exec backend python manage.py createsuperuser
+
+# Collect static files
+docker-compose exec backend python manage.py collectstatic --noinput
+
+# Open a Django shell
+docker-compose exec backend python manage.py shell
+```
+
+### View logs
+
+```bash
+docker-compose logs -f backend
+docker-compose logs -f celery_worker
+docker-compose logs -f celery_beat
+```
+
+### Stop everything
+
+```bash
+docker-compose down
+
+# Stop and delete volumes (resets the database)
+docker-compose down -v
+```
+
+---
+
+## Running Locally (without Docker)
+
+Make sure PostgreSQL and Redis are running locally before starting any of the services below.
+
+Update these values in your `.env`:
+
+```env
+DB_HOST=localhost
+REDIS_URL=redis://localhost:6379/0
+CELERY_BROKER_URL=redis://localhost:6379/1
+CELERY_RESULT_BACKEND=redis://localhost:6379/2
+```
+
+### Backend
+
+```bash
+cd backend
+python -m venv venv
+source venv/bin/activate          # Windows: venv\Scripts\activate
+pip install -r requirements.txt
+
+python manage.py migrate
+python manage.py createsuperuser
+python manage.py runserver
+```
+
+### Frontend
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+For Celery setup, see the [Celery Setup](#celery-setup) section below.
+
+---
+
+## Celery Setup
+
+Opticast uses Celery for all async background processing — audio extraction, WebSub handling, feed polling, and scheduled digest emails.
+
+### Celery Configuration Reference
+
+`config/celery.py`:
+
+```python
+import os
+from celery import Celery
+
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
+
+app = Celery("config")
+app.config_from_object("django.conf:settings", namespace="CELERY")
+app.autodiscover_tasks()
+```
+
+`config/__init__.py`:
+
+```python
+from .celery import app as celery_app
+
+__all__ = ("celery_app",)
+```
+
+`config/settings.py`:
+
+```python
+CELERY_BROKER_URL = env("CELERY_BROKER_URL", default="redis://localhost:6379/1")
+CELERY_RESULT_BACKEND = env("CELERY_RESULT_BACKEND", default="redis://localhost:6379/2")
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_TIMEZONE = "UTC"
+```
+
+---
+
+### Running Celery Locally (without Docker)
+
+Make sure Redis is running (`redis-server`) and your virtual environment is active. Open a separate terminal for each process.
+
+#### Terminal 1 — Celery Worker
+
+```bash
+cd backend
+celery -A config worker --loglevel=info
+```
+
+For a quieter dev environment with a single thread:
+
+```bash
+celery -A config worker --loglevel=info --concurrency=1
+```
+
+#### Terminal 2 — Celery Beat (Scheduled Tasks)
+
+Runs periodic tasks like the 15-minute channel poller, daily WebSub renewal, and weekly digest emails:
+
+```bash
+cd backend
+celery -A config beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+```
+
+#### Dev Shortcut — Worker + Beat in One Process
+
+> ⚠️ Convenient for local dev but **not safe for production** — use separate processes there.
+
+```bash
+cd backend
+celery -A config worker --beat --loglevel=info
+```
+
+#### Flower — Task Monitor (Optional)
+
+Flower gives you a real-time web UI to inspect tasks, workers, and queues:
+
+```bash
+pip install flower
+celery -A config flower --port=5555
+```
+
+Then open: [http://localhost:5555](http://localhost:5555)
+
+---
+
+### Running Celery with Docker
+
+All Celery services (`celery_worker`, `celery_beat`, `flower`) are defined in `docker-compose.yml` and start automatically with `docker-compose up`.
+
+#### Start only the Celery services
+
+```bash
+docker-compose up celery_worker celery_beat flower
+```
+
+#### Restart a single service after code changes
+
+```bash
+docker-compose restart celery_worker
+```
+
+#### View live task logs
+
+```bash
+docker-compose logs -f celery_worker
+docker-compose logs -f celery_beat
+```
+
+#### Trigger a one-off task inside the worker container
+
+```bash
+docker-compose exec celery_worker celery -A config call tasks.extract_audio --args='[<episode_id>]'
+```
+
+#### Inspect active workers
+
+```bash
+docker-compose exec celery_worker celery -A config inspect active
+```
+
+---
+
+## API Overview
+
+All API routes are prefixed with `/api/`.
+
+| Prefix            | App       | Description                             |
+| ----------------- | --------- | --------------------------------------- |
+| `/api/auth/`      | accounts  | Google OAuth, JWT, creator profile      |
+| `/api/channels/`  | channels  | YouTube channel management, WebSub      |
+| `/api/episodes/`  | episodes  | Episode list, detail, retry             |
+| `/api/feeds/`     | feeds     | RSS preview, directory submissions      |
+| `/api/analytics/` | analytics | Download stats, geo, app breakdown      |
+| `/api/billing/`   | billing   | Polar checkout, portal, subscription    |
+| `/feed/<slug>/`   | feeds     | **Public** RSS feed (no `/api/` prefix) |
+
+Full model, view, and route documentation is in [`backend/BACKEND.md`](./backend/BACKEND.md).
+
+---
+
+## Background Tasks
+
+Celery handles all async processing. Key tasks:
+
+| Task                                  | Trigger                          | Description                                                |
+| ------------------------------------- | -------------------------------- | ---------------------------------------------------------- |
+| `process_new_video_notification`      | WebSub push / polling            | Parses new video, applies creator filters, queues pipeline |
+| `extract_audio`                       | After video detected             | yt-dlp download → FFmpeg normalisation → Cloudinary upload |
+| `poll_all_active_channels`            | Every 15 min (Beat)              | Polling fallback for missed WebSub pings                   |
+| `renew_expiring_websub_subscriptions` | Daily (Beat)                     | Re-subscribes channels whose WebSub lease is expiring      |
+| `send_weekly_digest`                  | Every Monday 9am UTC (Beat)      | Sends download summary email to each creator               |
+| `schedule_channel_cleanup`            | 30 days after channel disconnect | Deletes audio files from Cloudinary                        |
+
+---
+
+## Deployment
+
+### Production checklist
+
+- [ ] Set `DEBUG=False`
+- [ ] Set a strong, unique `SECRET_KEY`
+- [ ] Set `ALLOWED_HOSTS` to your actual domain
+- [ ] Set `CORS_ALLOWED_ORIGINS` to your frontend domain
+- [ ] Point `WEBSUB_CALLBACK_URL` to your live domain
+- [ ] Set `GOOGLE_OAUTH_REDIRECT_URI` to your live domain
+- [ ] Register your Polar webhook endpoint in the Polar dashboard
+- [ ] Run `python manage.py collectstatic`
+- [ ] Use Gunicorn instead of the Django dev server
+- [ ] Put Nginx in front of Gunicorn for static file serving and SSL termination
+- [ ] Run `celery_worker` and `celery_beat` as separate supervised containers
+- [ ] Set `CELERY_TASK_ALWAYS_EAGER=False` in production settings
+- [ ] Monitor tasks via Flower or forward Celery logs to your observability stack
+
+### Swap the backend command in production
+
+```yaml
+# docker-compose.yml
+backend:
+    command: gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 4
+
+celery_worker:
+    command: celery -A config worker --loglevel=warning --concurrency=4
+```
+
+---
+
+## License
+
+MIT
