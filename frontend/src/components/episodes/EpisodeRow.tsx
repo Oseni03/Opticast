@@ -82,6 +82,9 @@ export default function EpisodeRow({ episode, retryCount = 0 }: EpisodeRowProps)
   const isPublished = episode.processing_status === 'done';
   const isProcessing = episode.processing_status === 'processing';
   const isQueued = episode.processing_status === 'queued';
+  const isRetrying = retryMutation.isPending;
+
+  const retriesUsed = isFailed ? Math.min(retryCount, 3) : 0;
 
   const handleRetry = () => {
     retryMutation.mutate(episode.id);
@@ -93,11 +96,15 @@ export default function EpisodeRow({ episode, retryCount = 0 }: EpisodeRowProps)
       ? format(new Date(episode.youtube_pub_date), 'MMM d, yyyy')
       : '—';
 
-  const metaText = isProcessing
-    ? 'Extracting audio'
-    : isQueued
-      ? 'Waiting in line'
-      : `${dateText} · ${episode.duration_formatted || '—'}`;
+  const metaText = isRetrying && isFailed
+    ? 'Re-queuing…'
+    : isProcessing
+      ? 'Extracting audio'
+      : isQueued
+        ? 'Waiting in line'
+        : isFailed && retriesUsed > 0
+          ? `Audio extraction failed. Retry ${retriesUsed} of 3 used.`
+          : `${dateText} · ${episode.duration_formatted || '—'}`;
 
   return (
     <li
