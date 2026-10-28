@@ -1,251 +1,216 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import { PlayIcon, MoreVerticalIcon, PlusIcon, SearchIcon, Mic2Icon, LayoutDashboardIcon, X, RefreshCwIcon } from 'lucide-react';
+import { Plus, Loader2 } from 'lucide-react';
+import { useChannel } from '@/hooks/useChannels';
 import { useEpisodes } from '@/hooks/useEpisodes';
-import { useRetryEpisode } from '@/hooks/useEpisodes';
+import { useCreateEpisode } from '@/hooks/useEpisodes';
+import EpisodeRow from '@/components/episodes/EpisodeRow';
+import EpisodeRowSkeleton from '@/components/episodes/EpisodeRowSkeleton';
+import EpisodesEmpty from '@/components/episodes/EpisodesEmpty';
+import SearchBar from '@/components/episodes/SearchBar';
+import EpisodesPagination from '@/components/episodes/EpisodesPagination';
+import AddEpisodeDialog from '@/components/episodes/AddEpisodeDialog';
 import type { EpisodeListItem } from '@/lib/types';
 
-const STATUS_LABELS: Record<EpisodeListItem['processing_status'], string> = {
-    queued: 'Queued',
-    processing: 'Processing',
-    done: 'Ready',
-    failed: 'Failed',
-    skipped: 'Skipped',
-};
+const PAGE_SIZE = 10;
 
-const STATUS_COLORS: Record<EpisodeListItem['processing_status'], string> = {
-    queued: 'bg-[#f5f1e0] text-[#5a5a66]',
-    processing: 'bg-[#c8f135] text-[#403e0a]',
-    done: 'bg-[#0a0a0a] text-white dark:bg-[#0a0a0a] dark:text-white',
-    failed: 'bg-[#f65858]/10 text-[#f65858] dark:bg-[#f65858]/20 dark:text-[#f65858]',
-    skipped: 'bg-[#f5f1e0] text-[#5a5a66]',
-};
-
-function SkeletonRow() {
-    return (
-        <tr className="border-b border-border animate-pulse">
-            {[1, 2, 3, 4, 5, 6].map((i) => (
-                <td key={i} className="px-6 md:px-8 py-6">
-                    <div className="h-4 bg-muted rounded-md" />
-                </td>
-            ))}
-        </tr>
-    );
+function extractYouTubeVideoId(url: string): string | null {
+  const patterns = [
+    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/,
+    /youtube\.com\/watch\?.*v=([a-zA-Z0-9_-]{11})/,
+  ];
+  for (const pattern of patterns) {
+    const match = url.match(pattern);
+    if (match) return match[1];
+  }
+  return null;
 }
 
 export default function EpisodesPage() {
-    const { projectId } = useParams() as { projectId: string };
-    const [selectedEpisode, setSelectedEpisode] = useState<EpisodeListItem | null>(null);
-    const [searchInput, setSearchInput] = useState('');
-    const [debouncedSearch, setDebouncedSearch] = useState('');
+  const { projectId } = useParams() as { projectId: string };
+  const [page, setPage] = useState(1);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogVariant, setDialogVariant] = useState<'default' | 'error' | 'adding'>('default');
+  const [dialogError, setDialogError] = useState<string | undefined>(undefined);
+  const [dialogUrl, setDialogUrl] = useState('');
 
-    // Debounce search
-    useEffect(() => {
-        const t = setTimeout(() => setDebouncedSearch(searchInput), 400);
-        return () => clearTimeout(t);
-    }, [searchInput]);
+  const {
+    data: channel,
+    isLoading: channelLoading,
+  } = useChannel(projectId);
 
-    const { data, isLoading, isError } = useEpisodes(
-        debouncedSearch ? { search: debouncedSearch, channel: projectId } : { channel: projectId }
-    );
-    const retryMutation = useRetryEpisode();
+  const {
+    data,
+    isLoading,
+    isError,
+    refetch,
+  } = useEpisodes({
+    channel: projectId,
+    search: searchQuery || undefined,
+    page,
+    page_size: PAGE_SIZE,
+  });
 
-    const episodes = data?.results ?? [];
+  const episodes: EpisodeListItem[] = data?.results ?? [];
+  const totalCount = data?.count ?? 0;
+  const pageCount = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
 
+  const hasSearchResults = Boolean(searchQuery);
+  const isEmpty = !isLoading && !isError && episodes.length === 0;
+  const isRetrying = false;
+
+  useEffect(() => {
+    setPage(1);
+  }, [searchQuery]);
+
+  const createMutation = useCreateEpisode();
+
+  const handleAddEpisode = useCallback(
+    (youtubeUrl: string) => {
+      const videoId = extractYouTubeVideoId(youtubeUrl);
+      if (!videoId) {
+        setDialogVariant('error');
+        setDialogError("We couldn't find that video. Check the link and try again.");
+        return;
+      }
+      setDialogVariant('adding');
+      createMutation.mutate(
+        { channelId: projectId, videoId },
+        {
+          onSuccess: () => {
+            setDialogOpen(false);
+            setDialogVariant('default');
+          setDialogError(undefined);
+            setDialogUrl('');
+            refetch();
+          },
+          onError: () => {
+            setDialogVariant('error');
+            setDialogError("We couldn't add that episode. Try again later.");
+          },
+        }
+      );
+    },
+    [projectId, createMutation, refetch]
+  );
+
+  const handleClearSearch = useCallback(() => {
+    setSearchQuery('');
+  }, []);
+
+  if (channelLoading) {
     return (
-        <div className="max-w-7xl mx-auto">
-            {/* Detail modal */}
-            {selectedEpisode && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-[#0a0a0a]/40 backdrop-blur-sm">
-                    <div className="bg-surface-container-lowest border border-border p-8 md:p-10 max-w-2xl w-full rounded-3xl shadow-[0px_24px_48px_rgba(25,28,30,0.06)]">
-                        <div className="flex justify-between items-start mb-8">
-                            <div>
-                                <h4 className="text-3xl font-display font-bold tracking-tight text-primary">{selectedEpisode.title}</h4>
-                                <p className="text-muted-foreground text-sm font-medium mt-2">Episode Details</p>
-                            </div>
-                            <button
-                                onClick={() => setSelectedEpisode(null)}
-                                className="p-3 bg-surface-container-low hover:bg-surface-container-high text-muted-foreground hover:text-primary rounded-full transition-colors duration-200"
-                            >
-                                <X className="w-5 h-5" />
-                            </button>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                            <div className="p-6 bg-surface-container-low rounded-2xl">
-                                <p className="text-sm font-semibold text-muted-foreground mb-2">Total Downloads</p>
-                                <p className="text-4xl font-display font-bold text-primary">{selectedEpisode.download_count.toLocaleString()}</p>
-                            </div>
-                            <div className="p-6 bg-surface-container-low rounded-2xl">
-                                <p className="text-sm font-semibold text-muted-foreground mb-2">Status</p>
-                                <p className="text-2xl font-display font-bold text-primary">{STATUS_LABELS[selectedEpisode.processing_status]}</p>
-                            </div>
-                        </div>
-
-                        <div className="space-y-4 mb-8 bg-surface-container-low rounded-2xl p-6">
-                            <div className="flex justify-between text-sm font-medium">
-                                <span className="text-muted-foreground">Duration</span><span className="text-primary">{selectedEpisode.duration_formatted || '—'}</span>
-                            </div>
-                            <div className="flex justify-between text-sm font-medium">
-                                <span className="text-muted-foreground">Format</span><span className="text-primary">{selectedEpisode.audio_format || '—'}</span>
-                            </div>
-                            <div className="flex justify-between text-sm font-medium">
-                                <span className="text-muted-foreground">Published</span>
-                                <span className="text-primary">{selectedEpisode.pub_date ? new Date(selectedEpisode.pub_date).toLocaleDateString() : '—'}</span>
-                            </div>
-                        </div>
-
-                        {selectedEpisode.processing_status === 'failed' && (
-                            <button
-                                onClick={() => retryMutation.mutate(selectedEpisode.id)}
-                                disabled={retryMutation.isPending}
-                                className="w-full py-4 mb-4 bg-[#f5f1e0] text-[#14140a] font-semibold text-sm rounded-xl hover:bg-[#e7e4d6] transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
-                            >
-                                <RefreshCwIcon className="w-4 h-4" />
-                                {retryMutation.isPending ? 'Queuing…' : 'Retry Processing'}
-                            </button>
-                        )}
-
-                        <button
-                            onClick={() => setSelectedEpisode(null)}
-                            className="w-full py-4 bg-gradient-to-br from-primary to-primary-container text-primary-foreground font-semibold text-sm rounded-xl hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200"
-                        >
-                            Close
-                        </button>
-                    </div>
-                </div>
-            )}
-
-            {/* Header */}
-            <header className="flex flex-col md:flex-row md:justify-between items-start md:items-end gap-6 mb-8 pb-6">
-                <div>
-                    <h2 className="text-3xl font-display font-bold text-primary tracking-tight">Episodes</h2>
-                    <p className="text-muted-foreground mt-2 font-medium text-sm">
-                        {isLoading ? 'Loading…' : `${data?.count ?? 0} episode${(data?.count ?? 0) !== 1 ? 's' : ''}`}
-                    </p>
-                </div>
-                <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto mt-6 md:mt-0">
-                    <div className="flex-1 sm:flex-none relative">
-                        <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/60 w-5 h-5" />
-                        <input
-                            type="text"
-                            placeholder="Search episodes…"
-                            value={searchInput}
-                            onChange={(e) => setSearchInput(e.target.value)}
-                            className="w-full sm:w-64 md:w-80 bg-surface-container-lowest border-none px-12 py-3 rounded-xl text-sm font-medium text-primary focus:ring-1 focus:ring-primary focus:outline-none placeholder:text-muted-foreground/60 transition-all duration-200"
-                        />
-                    </div>
-                    <Button
-                        asChild
-                        className="w-full sm:w-auto h-auto px-6 py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2"
-                    >
-                        <Link href={`/projects/${projectId}/episodes/new`}>
-                            <PlusIcon className="w-5 h-5" />
-                            New Episode
-                        </Link>
-                    </Button>
-                </div>
-            </header>
-
-            <div className="bg-surface-container-lowest border border-border overflow-hidden rounded-3xl shadow-[0px_12px_24px_rgba(25,28,30,0.04)]">
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse min-w-[800px]">
-                        <thead className="bg-surface-container-low text-muted-foreground border-b border-border">
-                            <tr>
-                                <th className="px-6 md:px-8 py-5 text-xs font-semibold uppercase tracking-wider">Episode</th>
-                                <th className="px-6 md:px-8 py-5 text-xs font-semibold uppercase tracking-wider">Duration</th>
-                                <th className="px-6 md:px-8 py-5 text-xs font-semibold uppercase tracking-wider">Published</th>
-                                <th className="px-6 md:px-8 py-5 text-xs font-semibold uppercase tracking-wider text-right">Downloads</th>
-                                <th className="px-6 md:px-8 py-5 text-xs font-semibold uppercase tracking-wider">Status</th>
-                                <th className="px-6 md:px-8 py-5 text-xs font-semibold uppercase tracking-wider text-right">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-border">
-                            {isLoading && [1, 2, 3, 4].map((i) => <SkeletonRow key={i} />)}
-
-                            {isError && (
-                                <tr>
-                                    <td colSpan={6} className="px-8 py-16 text-center text-sm font-medium text-muted-foreground">
-                                        Failed to load episodes. Is the backend running?
-                                    </td>
-                                </tr>
-                            )}
-
-                            {!isLoading && !isError && episodes.length === 0 && (
-                                <tr>
-                                    <td colSpan={6} className="px-8 py-16 text-center">
-                                        <p className="text-sm font-medium text-muted-foreground">
-                                            {debouncedSearch ? `No episodes matching "${debouncedSearch}"` : 'No episodes yet'}
-                                        </p>
-                                    </td>
-                                </tr>
-                            )}
-
-                            {episodes.map((episode) => (
-                                <tr key={episode.id} className="hover:bg-surface-container-low/50 transition-colors">
-                                    <td className="px-6 md:px-8 py-5 md:py-6">
-                                        <div className="flex items-center gap-4">
-                                            {episode.thumbnail_url ? (
-                                                // eslint-disable-next-line @next/next/no-img-element
-                                                <img
-                                                    src={episode.thumbnail_url}
-                                                    alt={episode.title}
-                                                    className="size-12 rounded-xl object-cover shadow-sm bg-surface-container-low"
-                                                />
-                                            ) : (
-                                                <div className="size-12 rounded-xl bg-surface-container-low shadow-sm flex items-center justify-center text-muted-foreground">
-                                                    <Mic2Icon className="size-5" />
-                                                </div>
-                                            )}
-                                            <span className="font-semibold text-primary text-base line-clamp-2">{episode.title}</span>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 md:px-8 py-5 md:py-6 text-sm font-medium text-muted-foreground whitespace-nowrap">
-                                        {episode.duration_formatted || '—'}
-                                    </td>
-                                    <td className="px-6 md:px-8 py-5 md:py-6 text-sm font-medium text-muted-foreground whitespace-nowrap">
-                                        {episode.pub_date ? new Date(episode.pub_date).toLocaleDateString() : new Date(episode.youtube_pub_date).toLocaleDateString()}
-                                    </td>
-                                    <td className="px-6 md:px-8 py-5 md:py-6 text-base font-semibold text-primary text-right whitespace-nowrap">
-                                        {episode.download_count.toLocaleString()}
-                                    </td>
-                                    <td className="px-6 md:px-8 py-5 md:py-6">
-                                        <span className={`inline-block text-xs font-semibold px-3 py-1 rounded-md whitespace-nowrap ${STATUS_COLORS[episode.processing_status]}`}>
-                                            {STATUS_LABELS[episode.processing_status]}
-                                        </span>
-                                    </td>
-                                    <td className="px-6 md:px-8 py-5 md:py-6 text-right">
-                                        <div className="flex justify-end gap-2 text-muted-foreground">
-                                            <button
-                                                onClick={() => setSelectedEpisode(episode)}
-                                                className="p-2 hover:bg-surface-container hover:text-primary rounded-xl transition-colors duration-200"
-                                                title="View details"
-                                            >
-                                                <LayoutDashboardIcon className="size-5" />
-                                            </button>
-                                            {episode.audio_url && (
-                                                <a
-                                                    href={episode.audio_url}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="p-2 hover:bg-surface-container hover:text-primary rounded-xl transition-colors duration-200"
-                                                    title="Play audio"
-                                                >
-                                                    <PlayIcon className="size-5" />
-                                                </a>
-                                            )}
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+      <div className="max-w-5xl mx-auto p-8 space-y-8">
+        <div className="h-10 w-64 bg-[#e7e4d6] rounded animate-pulse" />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <EpisodeRowSkeleton />
+          <EpisodeRowSkeleton />
         </div>
+      </div>
     );
+  }
+
+  const channelName = channel?.channel_title || 'this channel';
+  const podcastTitle = channel?.podcast_title || channel?.channel_title || 'Untitled';
+
+  if (isError) {
+    return (
+      <div className="max-w-5xl mx-auto p-20 text-center">
+        <div className="size-20 rounded-full bg-[#f65858]/10 flex items-center justify-center mx-auto mb-6">
+          <Loader2 className="size-10 text-[#8a1c1c]" />
+        </div>
+        <h2 className="text-2xl font-display font-bold text-[#14140a] mb-2">
+          Failed to load episodes
+        </h2>
+        <p className="text-[#5a5a66] mb-8 text-sm">
+          We couldn't load the episodes for this project. Try again in a moment.
+        </p>
+        <button
+          onClick={() => refetch()}
+          className="min-h-[48px] px-[24px] rounded-6 bg-[#c8f135] text-[#403e0a] font-bold text-[15px] cursor-pointer"
+        >
+          Try again
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-5xl mx-auto pb-20">
+      <AddEpisodeDialog
+        open={dialogOpen}
+        onClose={() => {
+          setDialogOpen(false);
+          setDialogVariant('default');
+          setDialogError(undefined);
+          setDialogUrl('');
+        }}
+        variant={dialogVariant}
+        errorMessage={dialogError}
+        youtubeUrl={dialogUrl}
+        setYoutubeUrl={setDialogUrl}
+        onAdd={handleAddEpisode}
+        isAdding={dialogVariant === 'adding'}
+      />
+
+      {/* Header */}
+      <div className="flex flex-wrap items-center justify-between gap-[14px] mb-[20px]">
+        <SearchBar
+          value={searchQuery}
+          onChange={setSearchQuery}
+          onSubmit={() => setPage(1)}
+        />
+        <div className="font-mono text-[12px] tracking-wider uppercase text-[#5a5a66]">
+          {totalCount} episode{totalCount !== 1 ? 's' : ''}
+        </div>
+        <button
+          type="button"
+          onClick={() => setDialogOpen(true)}
+          className="inline-flex items-center gap-[8px] min-h-[48px] px-[22px] rounded-6 bg-[#c8f135] text-[#403e0a] font-bold text-[16px] cursor-pointer"
+        >
+          <Plus className="w-[18px] h-[18px]" strokeWidth="2.5" />
+          Add episode
+        </button>
+      </div>
+
+      {/* Episode list */}
+      <ul
+        aria-label="Episodes"
+        className="list-none m-0 p-0 flex flex-col gap-[12px]"
+      >
+        {isLoading ? (
+          [1, 2, 3].map((i) => (
+            <EpisodeRowSkeleton key={i} />
+          ))
+        ) : isEmpty ? (
+          <li>
+            <EpisodesEmpty
+              channelName={channelName}
+              searchQuery={hasSearchResults ? searchQuery : undefined}
+              onAdd={() => setDialogOpen(true)}
+              onClear={handleClearSearch}
+            />
+          </li>
+        ) : (
+          episodes.map((episode) => (
+            <EpisodeRow key={episode.id} episode={episode} />
+          ))
+        )}
+      </ul>
+
+      {/* Pagination (only when not empty/searching) */}
+      {!isEmpty && !hasSearchResults && totalCount > PAGE_SIZE && (
+        <EpisodesPagination
+          page={page}
+          pageCount={pageCount}
+          onPrev={() => setPage((p) => Math.max(1, p - 1))}
+          onNext={() => setPage((p) => Math.min(pageCount, p + 1))}
+        />
+      )}
+    </div>
+  );
 }
