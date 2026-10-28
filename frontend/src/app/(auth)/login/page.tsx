@@ -1,11 +1,10 @@
 import AuthForm from "@/components/auth/AuthForm";
 
 export const metadata = {
-	title: "Sign In — Opticast",
-	description:
-		"Sign in to your Opticast account to access your podcast studio.",
+  title: "Log in — Opttis",
+  description: "Sign in to your Opttis account to access your podcast studio.",
 };
 
 export default function LoginPage() {
-	return <AuthForm mode="login" />;
+  return <AuthForm mode="login" />;
 }
